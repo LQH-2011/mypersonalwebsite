@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conway's Game of Life</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #gameCanvas {
+            border: 2px solid #4a4a4a;
+            margin: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+        #generationCounter {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Conway's Game of Life</h1>
+    <div class="controls">
+        <button onclick="startGame()">Start</button>
+        <button onclick="stopGame()">Stop</button>
+        <button onclick="clearGrid()">Clear</button>
+        <button onclick="randomize()">Random</button>
+        <div class="slider-container">
+            <label for="speedSlider">Speed:</label>
+            <input type="range" id="speedSlider" min="50" max="1000" value="950" step="50">
+        </div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="generationCounter">Generation: 0</div>
+
+    <script>
+        const CELL_SIZE = 15;
+        const GRID_COLOR = '#303030';
+        const DEAD_COLOR = '#202020';
+        const ALIVE_COLOR = '#4CAF50';
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = 50;
+        let height = 30;
+        let grid = [];
+        let isRunning = false;
+        let generation = 0;
+        let animationFrameId = null;
+        let speed = 100; // milliseconds between updates
+        let lastUpdate = 0;
+
+        // Initialize canvas size
+        function updateCanvasSize() {
+            canvas.width = width * CELL_SIZE;
+            canvas.height = height * CELL_SIZE;
+        }
+
+        // Initialize grid
+        function initializeGrid() {
+            grid = new Array(width);
+            for (let i = 0; i < width; i++) {
+                grid[i] = new Array(height).fill(0);
+            }
+        }
+
+        // Draw grid
+        function draw() {
+            ctx.fillStyle = DEAD_COLOR;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    if (grid[x][y]) {
+                        ctx.fillStyle = ALIVE_COLOR;
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
+                    }
+                }
+            }
+
+            // Draw grid lines
+            ctx.strokeStyle = GRID_COLOR;
+            for (let x = 0; x <= width; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * CELL_SIZE, 0);
+                ctx.lineTo(x * CELL_SIZE, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= height; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * CELL_SIZE);
+                ctx.lineTo(canvas.width, y * CELL_SIZE);
+                ctx.stroke();
+            }
+        }
+
+        // Get number of neighbors
+        function getNeighbors(x, y) {
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    if (i === 0 && j === 0) continue;
+                    const newX = (x + i + width) % width;
+                    const newY = (y + j + height) % height;
+                    count += grid[newX][newY];
+                }
+            }
+            return count;
+        }
+
+        // Update grid state
+        function update() {
+            const newGrid = grid.map(arr => [...arr]);
+            
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    const neighbors = getNeighbors(x, y);
+                    
+                    if (grid[x][y]) {
+                        newGrid[x][y] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+                    } else {
+                        newGrid[x][y] = neighbors === 3 ? 1 : 0;
+                    }
+                }
+            }
+            
+            grid = newGrid;
+            generation++;
+            document.getElementById('generationCounter').textContent = `Generation: ${generation}`;
+        }
+
+        // Game loop
+        function gameLoop(timestamp) {
+            if (!isRunning) return;
+            
+            if (timestamp - lastUpdate >= speed) {
+                update();
+                lastUpdate = timestamp;
+            }
+            draw();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // Control functions
+        function startGame() {
+            if (!isRunning) {
+                isRunning = true;
+                lastUpdate = performance.now();
+                gameLoop(lastUpdate);
+            }
+        }
+
+        function stopGame() {
+            isRunning = false;
+            cancelAnimationFrame(animationFrameId);
+        }
+
+        function clearGrid() {
+            generation = 0;
+            initializeGrid();
+            draw();
+            document.getElementById('generationCounter').textContent = `Generation: ${generation}`;
+        }
+
+        function randomize() {
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    grid[x][y] = Math.random() > 0.85 ? 1 : 0;
+                }
+            }
+            draw();
+        }
+
+        // Handle canvas clicks
+        canvas.addEventListener('click', (e) => {
+            if (isRunning) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / CELL_SIZE);
+            const y = Math.floor((e.clientY - rect.top) / CELL_SIZE);
+            
+            if (x >= 0 && x < width && y >= 0 && y < height) {
+                grid[x][y] = grid[x][y] ? 0 : 1;
+                draw();
+            }
+        });
+
+        // Speed control (reversed slider)
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            speed = 1050 - parseInt(e.target.value); // Inverts the slider values
+        });
+
+        // Initialize
+        updateCanvasSize();
+        initializeGrid();
+        draw();
+    </script>
+</body>
+</html>
