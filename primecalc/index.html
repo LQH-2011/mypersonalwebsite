@@ -4,23 +4,41 @@
     <meta charset="UTF-8">
     <title>质数判断与质因数分解</title>
     <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --container-bg: #f5f5f5;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --container-bg: #2d2d2d;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 600px;
             margin: 20px auto;
             padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
         }
+
         .container {
-            background-color: #f5f5f5;
+            background-color: var(--container-bg);
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+
         input {
             padding: 8px;
             margin: 10px 0;
             width: 200px;
         }
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -30,17 +48,36 @@
             cursor: pointer;
             margin: 5px;
         }
+
         button:hover {
             background-color: #45a049;
         }
+
         #result {
             margin-top: 20px;
             padding: 10px;
             border-radius: 4px;
         }
+
+        #themeToggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background-color: var(--container-bg);
+        }
     </style>
 </head>
 <body>
+    <button id="themeToggle">🌙</button>
+    
     <div class="container">
         <h2>质数判断与质因数分解</h2>
         <input type="number" id="numberInput" placeholder="请输入正整数" min="2">
@@ -52,6 +89,24 @@
     </div>
 
     <script>
+        // 主题切换功能
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        let isDark = localStorage.getItem('theme') === 'dark';
+        updateTheme();
+
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            updateTheme();
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        function updateTheme() {
+            body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggle.textContent = isDark ? '🌞' : '🌙';
+        }
+
+        // 质数相关功能
         function isPrime(num) {
             if (num <= 1) return false;
             if (num === 2) return true;
@@ -65,19 +120,16 @@
 
         function primeFactors(num) {
             let factors = [];
-            // 处理2的因子
             while(num % 2 === 0) {
                 factors.push(2);
                 num /= 2;
             }
-            // 处理奇数因子
             for(let i = 3; i <= Math.sqrt(num); i += 2) {
                 while(num % i === 0) {
                     factors.push(i);
                     num /= i;
                 }
             }
-            // 如果剩余数仍大于2
             if(num > 2) factors.push(num);
             return factors;
         }
@@ -97,8 +149,7 @@
                 return;
             }
             
-            const isNumPrime = isPrime(num);
-            showResult(`${num} ${isNumPrime ? '是' : '不是'}质数`);
+            showResult(`${num} ${isPrime(num) ? '是' : '不是'}质数`);
         }
 
         function factorize() {
@@ -111,11 +162,9 @@
             }
             
             const factors = primeFactors(num);
-            if(factors.length === 1) {
-                showResult(`${num} 是质数，无法分解质因数`);
-            } else {
-                showResult(`${num} = ${factors.join(' × ')}`);
-            }
+            showResult(factors.length === 1 ? 
+                `${num} 是质数，无法分解质因数` : 
+                `${num} = ${factors.join(' × ')}`);
         }
     </script>
 </body>
