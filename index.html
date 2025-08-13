@@ -4,8 +4,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     	<style>
         	body {font-family: Georgia;}
-    		#updateinfo {
-                border: solid thick red;
+    		p.updateinfo {
                 max-width: fit-content;
                 padding-left: 7px;
                 padding-right: 7px;
@@ -14,14 +13,26 @@
                 font-weight: 200;
                 font-size: 200%;
             }
+            #updateinfo1 {
+                border: solid thick red;
+            }
+            #updateinfo2 {
+                border: solid thick mediumaquamarine;
+            }
+            #updateinfo {
+                margin-bottom: 1em;
+            }
         </style>
     </head>
+    <body>
     <h1>
         Welcome to my website!
     </h1>
-    <p id="updateinfo" style="margin-bottom: 1em;">2025.8 I'm working on a major update to the website. Have a peek <a href="/peek.html">here</a>. Stay excited!!</p>
+    <div id="updateinfo">
+       <p class="updateinfo" id="updateinfo1">2025.8 I'm working on a major update to the website. Have a peek <a href="/peek.html">here</a>. Stay excited!!</p>
+       <p class="updateinfo" id="updateinfo2">2025.8.13 Coming very soon!!!</p>
+    </div>
     <image alt="A photo of me in 2024" width=212 height=290 align=right src="selfie.webp" title="A photo of me in 2024" />
-    <body>
         <h2>About me:</h2>
         <p>
             I'm a middle school student at <a href="http://www.nfls.com.cn/">NFLS</a>, currently learning Spanish.
