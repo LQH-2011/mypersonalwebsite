@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to PDF Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        
+        .editor-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .markdown-input {
+            width: 100%;
+            height: 400px;
+            padding: 15px;
+            border: none;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .preview {
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        
+        .preview h1, .preview h2, .preview h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .preview p {
+            margin-bottom: 10px;
+        }
+        
+        .preview code {
+            background: #f8f8f8;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .preview pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .preview blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin: 15px 0;
+            color: #7f8c8d;
+        }
+        
+        .preview table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .preview table, .preview th, .preview td {
+            border: 1px solid #ddd;
+        }
+        
+        .preview th, .preview td {
+            padding: 8px 12px;
+        }
+        
+        .preview th {
+            background: #f2f2f2;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .samples {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .samples h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .sample-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .sample-btn {
+            background: #ecf0f1;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .sample-btn:hover {
+            background: #bdc3c7;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .editor-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Markdown to PDF Converter</h1>
+            <p class="subtitle">Write Markdown, preview in real-time, and convert to PDF</p>
+        </header>
+        
+        <div class="editor-container">
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Markdown Input</span>
+                    <span id="word-count">Words: 0</span>
+                </div>
+                <textarea id="markdown-input" class="markdown-input" placeholder="Enter your Markdown here..."></textarea>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Preview</span>
+                    <span>Live Update</span>
+                </div>
+                <div id="preview" class="preview">
+                    <p style="color: #7f8c8d; text-align: center;">Your formatted content will appear here</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="convert-btn" class="btn">Convert to PDF</button>
+        </div>
+        
+        <div class="samples">
+            <h3>Sample Markdown</h3>
+            <div class="sample-buttons">
+                <button class="sample-btn" data-sample="basic">Basic Formatting</button>
+                <button class="sample-btn" data-sample="lists">Lists</button>
+                <button class="sample-btn" data-sample="code">Code Block</button>
+                <button class="sample-btn" data-sample="table">Table</button>
+                <button class="sample-btn" data-sample="full">Full Example</button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Markdown to PDF Converter &copy; 2023 | Uses marked.js for Markdown parsing and jsPDF for PDF generation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize libraries
+        const { jsPDF } = window.jspdf;
+        
+        // DOM elements
+        const markdownInput = document.getElementById('markdown-input');
+        const preview = document.getElementById('preview');
+        const convertBtn = document.getElementById('convert-btn');
+        const wordCount = document.getElementById('word-count');
+        const sampleButtons = document.querySelectorAll('.sample-btn');
+        
+        // Configure marked options
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+        
+        // Update preview in real-time
+        markdownInput.addEventListener('input', updatePreview);
+        
+        // Update word count
+        markdownInput.addEventListener('input', updateWordCount);
+        
+        // Convert to PDF
+        convertBtn.addEventListener('click', convertToPDF);
+        
+        // Sample markdowns
+        const samples = {
+            basic: `# Heading 1
+## Heading 2
+### Heading 3
+
+This is a paragraph with **bold** and *italic* text.
+
+Here's a [link to Google](https://google.com).`,
+            
+            lists: `## Unordered List
+- Item 1
+- Item 2
+  - Subitem 2.1
+  - Subitem 2.2
+- Item 3
+
+## Ordered List
+1. First item
+2. Second item
+3. Third item`,
+            
+            code: `## Code Example
+
+Inline code: \`console.log("Hello World")\`
+
+Code block with syntax highlighting:
+
+\`\`\`javascript
+function greet(name) {
+    return "Hello, " + name + "!";
+}
+
+console.log(greet("World"));
+\`\`\``,
+            
+            table: `## Table Example
+
+| Name  | Age | Occupation |
+|-------|-----|------------|
+| Alice | 28  | Developer  |
+| Bob   | 32  | Designer   |
+| Carol | 45  | Manager    |`,
+            
+            full: `# Markdown Example Document
+
+## Introduction
+
+This is a sample document demonstrating various Markdown features.
+
+### Text Formatting
+
+You can make text **bold** or *italic*. You can also use ~~strikethrough~~.
+
+### Blockquote
+
+> This is a blockquote. It can span multiple lines and is great for quotes or important notes.
+
+### Lists
+
+#### Unordered List
+- Item one
+- Item two
+  - Nested item
+  - Another nested item
+- Item three
+
+#### Ordered List
+1. First item
+2. Second item
+3. Third item
+
+### Code
+
+Inline code: \`const example = "Hello World"\`
+
+\`\`\`javascript
+// Code block with syntax highlighting
+function calculateSum(a, b) {
+    return a + b;
+}
+
+const result = calculateSum(5, 3);
+console.log(result); // Output: 8
+\`\`\`
+
+### Table
+
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Data 1   | Data 2   | Data 3   |
+| Data 4   | Data 5   | Data 6   |
+
+### Horizontal Rule
+
+---
+
+### Link and Image
+
+Visit [Markdown Guide](https://www.markdownguide.org) for more information.
+
+---
+
+*Document generated using Markdown to PDF Converter*`
+        };
+        
+        // Load sample markdown
+        sampleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const sampleType = button.getAttribute('data-sample');
+                markdownInput.value = samples[sampleType];
+                updatePreview();
+                updateWordCount();
+            });
+        });
+        
+        // Functions
+        function updatePreview() {
+            const markdownText = markdownInput.value;
+            if (markdownText.trim() === '') {
+                preview.innerHTML = '<p style="color: #7f8c8d; text-align: center;">Your formatted content will appear here</p>';
+                return;
+            }
+            
+            const html = marked.parse(markdownText);
+            preview.innerHTML = html;
+        }
+        
+        function updateWordCount() {
+            const text = markdownInput.value.trim();
+            const words = text === '' ? 0 : text.split(/\s+/).length;
+            wordCount.textContent = `Words: ${words}`;
+        }
+        
+        function convertToPDF() {
+            const markdownText = markdownInput.value;
+            if (markdownText.trim() === '') {
+                alert('Please enter some Markdown text to convert.');
+                return;
+            }
+            
+            // Show loading state
+            convertBtn.textContent = 'Converting...';
+            convertBtn.disabled = true;
+            
+            // Convert markdown to HTML
+            const htmlContent = marked.parse(markdownText);
+            
+            // Create a temporary div to render HTML for PDF conversion
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            tempDiv.style.padding = '20px';
+            tempDiv.style.fontFamily = 'Arial, sans-serif';
+            tempDiv.style.lineHeight = '1.6';
+            document.body.appendChild(tempDiv);
+            
+            // Use html2canvas to capture the content
+            html2canvas(tempDiv, {
+                scale: 2, // Higher scale for better quality
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                // Remove the temporary div
+                document.body.removeChild(tempDiv);
+                
+                // Create PDF
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+                const imgX = (pdfWidth - imgWidth * ratio) / 2;
+                const imgY = 10;
+                
+                pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+                pdf.save('markdown-document.pdf');
+                
+                // Reset button state
+                convertBtn.textContent = 'Convert to PDF';
+                convertBtn.disabled = false;
+            }).catch(error => {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
+                
+                // Reset button state
+                convertBtn.textContent = 'Convert to PDF';
+                convertBtn.disabled = false;
+            });
+        }
+        
+        // Initialize with a sample
+        markdownInput.value = samples.basic;
+        updatePreview();
+        updateWordCount();
+    </script>
+</body>
+</html>
