@@ -1,99 +1,323 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
     <head>
+        <title>LQH-2011</title>
+        <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Home</title>
+        <meta name="author" content="LQH-2011">
+        <meta name="description" content="Personal Website of LQH-2011">
         <style>
-        	body {font-family: Optima;}
-    		p.updateinfo {
-                max-width: fit-content;
-                padding-left: 7px;
-                padding-right: 7px;
-                margin-bottom: 0.5em;
-                margin-top: 0.5em;
+            .navcontent {
+                display: none;
+                background-color: #000000;
+                padding: 20px;
+                margin-top: 10px;
+                max-width: 800px;
                 margin-left: auto;
                 margin-right: auto;
+            }
+            .nav:hover .navcontent {
+                display: block;
+            }
+            .nav {
+                color: #22ff22;
                 text-align: center;
-                font-weight: 200;
-                font-size: 200%;
+                margin-top: 30px;
+                width: 100%;
+                cursor: pointer;
             }
-            #updateinfo1 {
-                border: solid thick red;
+            .nav span {
+                padding: 8px 16px;
+                transition: background-color 0.3s;
             }
-            #updateinfo2 {
-                border: solid thick mediumaquamarine;
+            .nav span:hover {
+                background-color: rgba(34, 255, 34, 0.1);
             }
-            #updateinfo3 {
-                border: solid thick purple;
+            a:visited {color: #22cc22;}
+            a:link {color: #22cc22;}
+            body {
+                background-color: #000;
+                margin: 0;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-height: 100vh;
+                font-family: Menlo, monospace;
+            }
+            
+            .terminal {
+                background-color: #000;
+                width: 80%;
+                max-width: 800px;
+                height: 400px; /* Reduced height for rectangular shape */
+                border: 1px solid #00ff00;
+                border-radius: 5px;
+                overflow: hidden;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            }
+            
+            .terminal-header {
+                background-color: #333;
+                padding: 8px;
+                display: flex;
+                align-items: center;
+            }
+            
+            .terminal-buttons {
+                display: flex;
+                gap: 8px;
+            }
+            
+            .terminal-button {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+            }
+            
+            .close {
+                background-color: #ff5f56;
+            }
+            
+            .minimize {
+                background-color: #ffbd2e;
+            }
+            
+            .maximize {
+                background-color: #27ca3f;
+            }
+            
+            .terminal-title {
+                color: #ccc;
+                font-size: 14px;
+                margin-left: 10px;
+            }
+            
+            .terminal-content {
+                padding: 15px;
+                height: calc(100% - 40px);
+                overflow-y: auto;
+                color: #00ff00;
+                font-size: 16px;
+                line-height: 1.5;
+            }
+            
+            .cursor {
+                display: inline-block;
+                width: 8px;
+                height: 18px;
+                background-color: #00ff00;
+                margin-left: 2px;
+                animation: blink 1s infinite;
+            }
+            
+            @keyframes blink {
+                0%, 50% {
+                    opacity: 1;
+                }
+                51%, 100% {
+                    opacity: 0;
+                }
+            }
+            
+            .command {
+                color: #00ff00;
+            }
+            
+            .output {
+                color: #00ff00;
+                margin-bottom: 10px;
+            }
+            
+            .prompt {
+                color: #00ff00;
+                margin-right: 5px;
             }
         </style>
     </head>
     <body>
-    <h1>
-        Welcome to my website!
-    </h1>
-    <div id="updateinfo">
-        <p class="updateinfo" id="updateinfo1">2025.8 I'm working on a major update to the website. Have a peek <a href="/peek.html">here</a>. Stay excited!!</p>
-        <p class="updateinfo" id="updateinfo2">2025.8.28 Gonna upload a half-completed version soon. Big smiles :)</p>
-        <p class="updateinfo" id="updateinfo3">2025.11.15 Update's not far! In the meantime, try out the new <a href="/mdtopdf.html">Markdown to PDF converter</a> for free!</p>
-    </div>
-    <image alt="A photo of me in 2024" width=212 height=290 align=right src="selfie.webp" title="A photo of me in 2024" />
-        <h2>About me:</h2>
-        <p>
-            I'm a middle school student at <a href="http://www.nfls.com.cn/">NFLS</a>, currently learning Spanish.
-            I'm good at English and Maths and interested in a lot of other things, including IT.
-            My favorite song is Nina Nesbitt's Parachute. If you like it as well you can discuss music or any other topic you like with me through the email address below.
-        </p>
-        <img src="https://w.saobby.com/w/1rggmvt5">
-        <h2>My works:</h2>
-        <ul>
-            <li>
-                <a href="/mdtopdf.html">Markdown to PDF converter</a>
-            </li>
-            <li>
-                <a href="https://bgithub.xyz/LQH-2011/vbs_demo">A few VBS programs I've written</a>
-            </li>
-            <li>
-                <a href="https://note.ms/lqh2011">My notepad</a>
-            </li>
-            <li>
-                <a href="/primecalc">A prime number checker</a>
-            </li>
-            <li>
-                <a href="/gameoflife">Game of Life</a>
-            </li>
-            <li>
-                <a href="/pong">Pong</a>
-            </li>
-        </ul>
-        <h2>How to reach me:</h2>
-        <ul>
-            <li>
-                Email 1: <a href="mailto:jesus@lqh2011.com">jesus@lqh2011.com</a>
-            </li>
-            <li>
-                Email 2: <a href="mailto:lqh2011@foxmail.com">lqh2011@foxmail.com</a>
-            </li>
-            <li>
-                Github: <a href="https://bgithub.xyz/LQH-2011/">LQH-2011</a>
-            </li>
-            <li>
-                Duolingo: <a href="https://www.duolingo.com/profile/lqhjimmyjesus">lqhjimmyjesus</a>
-            </li>
-        </ul>
-        <h2>Other links:</h2>
-        <ul>
-            <li>
-                <a href="https://zhujingqi.com/">Jacky's website</a>
-            </li>
-            <li>
-                <a href="https://jacky.run.place">JackyOS</a>
-            </li>
-            <li>
-                <a href="https://purplelaser.run.place">Purple Laser's website</a>
-            </li>
-        </ul>
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <div class="terminal-button close"></div>
+                    <div class="terminal-button minimize"></div>
+                    <div class="terminal-button maximize"></div>
+                </div>
+                <div class="terminal-title">terminal@lqh2011.com</div>
+            </div>
+            <div class="terminal-content" id="terminal-content">
+                <!-- Content will be generated by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="nav" id="about-nav">
+            <span><b>About</b></span>
+            <div class="navcontent" id="about-content">
+                <p>
+                    My name is Jesús.(You can also call me LQH-2011)<br>
+                    I'm a middle school student in <a href=" ">NFLS</a >, currently learning
+                    Spanish. Other than that, I also speak English and Mandarin. You can find me on <a href="#duolingo">Duolingo</a >.<br>
+                    I like messing with computers, but never got the nerves to learn coding seriously.
+                        However, I do enjoy making useful/fun tools, sometimes with the help of AI :D.
+                        You can find them <a href="#myworks">below</a >.<br>
+                    My favorite song is <a href="https://music.apple.com/cn/album/parachute/1733899976?i=1733899994&l=en-GB$0/">Nina
+                        Nesbitt's Parachute</a >. If you like it as well you can discuss music or any other topic you like with me
+                    through the email address below.
+                </p >
+            </div>
+        </div>
+        
+        <div class="nav" id="works-nav">
+            <span><b>My works</b></span>
+            <div class="navcontent" id="works-content">
+                <ul>
+                    <li><a href="https://github.com/LQH-2011/vbs_demo/">A few simple VBS joke programs I've written myself</a ></li>
+                    <li><a href="https://bestchat.linkpc.net">Best Chat</a ></li>
+                    <li><a href="https://tienda.lqh2011.com">Fake online shop as Spanish homework</a ></li>
+                    <li><a href="/primecalc">A prime number checker</a ></li>
+                    <li><a href="/mdtopdf.html">A Markdown to PDF converter</a ></li>
+                    <li><a href="/gameoflife">Game of Life</a ></li>
+                    <li><a href="/pong">Pong</a ></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="nav" id="contact-nav">
+            <span><b>Contact</b></span>
+            <div class="navcontent" id="contact-content">
+                <ul>
+                    <li>Email 1: <a href="mailto:jesus@lqh2011.com">jesus@lqh2011.com</a ></li>
+                    <li>Email 2: <a href="mailto:lqh2011@foxmail.com">lqh2011@foxmail.com</a ></li>
+                    <li>Best Chat: <a href="https://bestchat.linkpc.net">bestchatlinkpcnet</a ></li>
+                    <li>Note.ms: <a href="https://note.ms/lqh2011/">My notepad</a ></li>
+                    <li>Github: <a href="https://github.com/LQH-2011/">LQH-2011</a ></li>
+                    <li>PhizChat: <a href="https://phiz.chat/u/PJVdWsEvMd0$0/">Jesús</a ></li>
+                    <li id="duolingo">Duolingo: <a href="https://www.duolingo.com/profile/lqhjimmyjesus/">lqhjimmyjesus</a ></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="nav" id="links-nav">
+            <span><b>Links</b></span>
+            <div class="navcontent" id="links-content">
+                <ul>
+                    <li>My blog: <a href="https://blog.lqh2011.com">blog.lqh2011.com</a ></li>
+                    <li>Jacky's website: <a href="https://zhujingqi.com">zhujingqi.com</a ></li>
+                    <li>JackyOS: <a href="https://jacky.run.place">jacky.run.place</a ></li>
+                    <li>Purple Laser's website: <a href="https://purplelaser.run.place">purplelaser.run.place</a ></li>
+                    <li>Free domain registration: <a href="https://freedomain.one">freedomain.one</a ></li>
+                </ul>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const terminalContent = document.getElementById('terminal-content');
+                let currentLine = 0;
+                
+                // Animation sequence
+                const commands = [
+                    { 
+                        command: 'whoami', 
+                        output: 'LQH-2011',
+                        delayBeforeOutput: 500,
+                        delayAfterOutput: 1000
+                    },
+                    { 
+                        command: 'pwd', 
+                        output: 'lqh2011.com',
+                        delayBeforeOutput: 500,
+                        delayAfterOutput: 1000
+                    },
+                    { 
+                        command: 'clear', 
+                        output: null,
+                        delayBeforeOutput: 500,
+                        delayAfterOutput: 1000
+                    }
+                ];
+                
+                function startAnimation() {
+                    terminalContent.innerHTML = '';
+                    currentLine = 0;
+                    executeNextCommand();
+                }
+                
+                function executeNextCommand() {
+                    if (currentLine >= commands.length) {
+                        // Animation complete, restart after a delay
+                        setTimeout(startAnimation, 1000);
+                        return;
+                    }
+                    
+                    const currentCommand = commands[currentLine];
+                    
+                    // Create command line
+                    const commandLine = document.createElement('div');
+                    commandLine.className = 'command-line';
+                    
+                    const prompt = document.createElement('span');
+                    prompt.className = 'prompt';
+                    prompt.textContent = '$ ';
+                    commandLine.appendChild(prompt);
+                    
+                    const commandText = document.createElement('span');
+                    commandText.className = 'command';
+                    commandLine.appendChild(commandText);
+                    
+                    const cursor = document.createElement('span');
+                    cursor.className = 'cursor';
+                    commandLine.appendChild(cursor);
+                    
+                    terminalContent.appendChild(commandLine);
+                    
+                    // Type the command
+                    typeText(commandText, currentCommand.command, 50, () => {
+                        // Remove cursor after typing
+                        cursor.remove();
+                        
+                        // Wait before showing output
+                        setTimeout(() => {
+                            if (currentCommand.output) {
+                                // Create output line
+                                const outputLine = document.createElement('div');
+                                outputLine.className = 'output';
+                                outputLine.textContent = currentCommand.output;
+                                terminalContent.appendChild(outputLine);
+                                
+                                // Wait before next command
+                                setTimeout(() => {
+                                    currentLine++;
+                                    executeNextCommand();
+                                }, currentCommand.delayAfterOutput);
+                            } else if (currentCommand.command === 'clear') {
+                                // Simulate clear command
+                                setTimeout(() => {
+                                    terminalContent.innerHTML = '';
+                                    currentLine++;
+                                    executeNextCommand();
+                                }, currentCommand.delayAfterOutput);
+                            }
+                        }, currentCommand.delayBeforeOutput);
+                    });
+                }
+                
+                function typeText(element, text, speed, callback) {
+                    let i = 0;
+                    const timer = setInterval(() => {
+                        if (i < text.length) {
+                            element.textContent += text.charAt(i);
+                            i++;
+                        } else {
+                            clearInterval(timer);
+                            if (callback) callback();
+                        }
+                    }, speed);
+                }
+                
+                // Start the animation
+                startAnimation();
+            });
+        </script>
     </body>
 </html>
-
-
