@@ -2,13 +2,737 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pong Game</title>
-    <link rel="stylesheet" href="/pong/style.css">
-    <link rel="icon" href="/icon.jpg" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurable Pong Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a1a;
+            font-family: Arial, sans-serif;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .game-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        canvas {
+            border: 2px solid #444;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: block;
+        }
+
+        /* Settings Button (Cog Icon) */
+        .settings-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: rotate(90deg);
+        }
+
+        .settings-btn.active {
+            transform: rotate(180deg);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .settings-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+            transition: transform 0.3s ease;
+        }
+
+        /* Overlay for blurred background */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 20;
+            border-radius: 5px;
+        }
+
+        .overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Config Panel - Centered Modal */
+        .config-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(30, 30, 30, 0.98);
+            border-radius: 15px;
+            padding: 30px;
+            width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 30;
+        }
+
+        .config-panel.visible {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .config-panel h2 {
+            margin: 0 0 25px 0;
+            text-align: center;
+            color: #4CAF50;
+            font-size: 22px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+
+        .config-group {
+            margin-bottom: 20px;
+        }
+
+        .config-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .config-group input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+            background: #333;
+            height: 4px;
+            border-radius: 2px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .config-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #fff;
+        }
+
+        .config-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #fff;
+        }
+
+        .config-group input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #333;
+            padding: 3px;
+            margin-top: 5px;
+        }
+
+        .value-display {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .reset-btn {
+            flex: 1;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+
+        .resume-btn {
+            flex: 1;
+            padding: 12px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .resume-btn:hover {
+            background: #1976D2;
+            transform: translateY(-1px);
+        }
+
+        .score-display {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 10px;
+        }
+
+        .score-display h3 {
+            margin: 0 0 10px 0;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .score-display .scores {
+            font-size: 22px;
+            display: flex;
+            justify-content: space-around;
+            font-weight: bold;
+        }
+
+        .player-score {
+            color: #4CAF50;
+        }
+
+        .ai-score {
+            color: #f44336;
+        }
+
+        .controls-info {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+        }
+
+        /* Scrollbar styling */
+        .config-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .config-panel::-webkit-scrollbar-track {
+            background: #222;
+            border-radius: 3px;
+        }
+
+        .config-panel::-webkit-scrollbar-thumb {
+            background: #4CAF50;
+            border-radius: 3px;
+        }
+
+        /* Pause indicator */
+        .pause-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #4CAF50;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 25;
+            border: 2px solid #4CAF50;
+        }
+
+        .pause-indicator.visible {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
-    <h1>Simple Pong Game</h1>
-    <canvas id="pong" width="800" height="500"></canvas>
-    <script src="/pong/game.js"></script>
+    <div class="game-container">
+        <canvas id="pongCanvas"></canvas>
+
+        <!-- Settings Button (Cog Icon) -->
+        <div class="settings-btn" id="settingsBtn" title="Settings">
+            <svg viewBox="0 0 24 24">
+                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+            </svg>
+        </div>
+
+        <!-- Overlay for blurred background -->
+        <div class="overlay" id="overlay"></div>
+
+        <!-- Pause indicator -->
+        <div class="pause-indicator" id="pauseIndicator">GAME PAUSED</div>
+
+        <!-- Configuration Panel - Centered Modal -->
+        <div class="config-panel" id="configPanel">
+            <h2>⚙️ Game Settings</h2>
+            
+            <div class="config-group">
+                <label>
+                    Ball Speed
+                    <span class="value-display" id="ballSpeedValue">5</span>
+                </label>
+                <input type="range" id="ballSpeed" min="3" max="10" step="0.5" value="5">
+            </div>
+
+            <div class="config-group">
+                <label>
+                    Player Speed
+                    <span class="value-display" id="playerSpeedValue">6</span>
+                </label>
+                <input type="range" id="playerSpeed" min="3" max="12" step="1" value="6">
+            </div>
+
+            <div class="config-group">
+                <label>
+                    AI Speed
+                    <span class="value-display" id="aiSpeedValue">4</span>
+                </label>
+                <input type="range" id="aiSpeed" min="2" max="10" step="0.5" value="4">
+            </div>
+
+            <div class="config-group">
+                <label>
+                    Ball Acceleration
+                    <span class="value-display" id="ballAccelerationValue">0.5</span>
+                </label>
+                <input type="range" id="ballAcceleration" min="0" max="2" step="0.1" value="0.5">
+            </div>
+
+            <div class="config-group">
+                <label>Background Color</label>
+                <input type="color" id="backgroundColor" value="#000000">
+            </div>
+
+            <div class="config-group">
+                <label>Paddle Color</label>
+                <input type="color" id="paddleColor" value="#ffffff">
+            </div>
+
+            <div class="config-group">
+                <label>Ball Color</label>
+                <input type="color" id="ballColor" value="#ffffff">
+            </div>
+
+            <div class="config-group">
+                <label>
+                    Paddle Height
+                    <span class="value-display" id="paddleSizeValue">80</span>
+                </label>
+                <input type="range" id="paddleSize" min="40" max="150" step="5" value="80">
+            </div>
+
+            <div class="score-display">
+                <h3>Current Score</h3>
+                <div class="scores">
+                    <span class="player-score">You: <span id="playerScoreDisplay">0</span></span>
+                    <span class="ai-score">AI: <span id="aiScoreDisplay">0</span></span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="reset-btn" onclick="resetGame()">Reset</button>
+                <button class="resume-btn" id="resumeBtn">Resume</button>
+            </div>
+
+            <div class="controls-info">
+                Controls: W/S or ↑/↓ to move paddle
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('pongCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = 800;
+        canvas.height = 400;
+
+        // Panel functionality
+        const settingsBtn = document.getElementById('settingsBtn');
+        const configPanel = document.getElementById('configPanel');
+        const overlay = document.getElementById('overlay');
+        const pauseIndicator = document.getElementById('pauseIndicator');
+        const resumeBtn = document.getElementById('resumeBtn');
+        let isPaused = false;
+
+        function openPanel() {
+            isPaused = true;
+            configPanel.classList.add('visible');
+            overlay.classList.add('visible');
+            settingsBtn.classList.add('active');
+            pauseIndicator.classList.add('visible');
+        }
+
+        function closePanel() {
+            isPaused = false;
+            configPanel.classList.remove('visible');
+            overlay.classList.remove('visible');
+            settingsBtn.classList.remove('active');
+            pauseIndicator.classList.remove('visible');
+        }
+
+        settingsBtn.addEventListener('click', () => {
+            if (isPaused) {
+                closePanel();
+            } else {
+                openPanel();
+            }
+        });
+
+        resumeBtn.addEventListener('click', closePanel);
+
+        // Close panel when clicking overlay
+        overlay.addEventListener('click', closePanel);
+
+        // Close panel with Escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isPaused) {
+                closePanel();
+            }
+        });
+
+        // Game configuration
+        const config = {
+            ballSpeed: 5,
+            playerSpeed: 6,
+            aiSpeed: 4,
+            ballAcceleration: 0.5,
+            backgroundColor: '#000000',
+            paddleColor: '#ffffff',
+            ballColor: '#ffffff',
+            paddleHeight: 80
+        };
+
+        // Game objects
+        const paddleWidth = 10;
+        const ballSize = 10;
+
+        // Player paddle (left)
+        const player = {
+            x: 20,
+            y: canvas.height / 2 - config.paddleHeight / 2,
+            width: paddleWidth,
+            height: config.paddleHeight,
+            score: 0,
+            dy: 0
+        };
+
+        // AI paddle (right)
+        const ai = {
+            x: canvas.width - 20 - paddleWidth,
+            y: canvas.height / 2 - config.paddleHeight / 2,
+            width: paddleWidth,
+            height: config.paddleHeight,
+            score: 0,
+            dy: 0
+        };
+
+        // Ball
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            size: ballSize,
+            dx: config.ballSpeed,
+            dy: config.ballSpeed * 0.6,
+            speed: config.ballSpeed
+        };
+
+        // Keyboard controls
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            // Prevent default scrolling
+            if (e.key === 'w' || e.key === 'W' || 
+                e.key === 's' || e.key === 'S' || 
+                e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                e.preventDefault();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Configuration panel listeners
+        function setupConfigListeners() {
+            document.getElementById('ballSpeed').addEventListener('input', (e) => {
+                config.ballSpeed = parseFloat(e.target.value);
+                document.getElementById('ballSpeedValue').textContent = config.ballSpeed;
+            });
+
+            document.getElementById('playerSpeed').addEventListener('input', (e) => {
+                config.playerSpeed = parseInt(e.target.value);
+                document.getElementById('playerSpeedValue').textContent = config.playerSpeed;
+            });
+
+            document.getElementById('aiSpeed').addEventListener('input', (e) => {
+                config.aiSpeed = parseFloat(e.target.value);
+                document.getElementById('aiSpeedValue').textContent = config.aiSpeed;
+            });
+
+            document.getElementById('ballAcceleration').addEventListener('input', (e) => {
+                config.ballAcceleration = parseFloat(e.target.value);
+                document.getElementById('ballAccelerationValue').textContent = config.ballAcceleration;
+            });
+
+            document.getElementById('backgroundColor').addEventListener('input', (e) => {
+                config.backgroundColor = e.target.value;
+            });
+
+            document.getElementById('paddleColor').addEventListener('input', (e) => {
+                config.paddleColor = e.target.value;
+            });
+
+            document.getElementById('ballColor').addEventListener('input', (e) => {
+                config.ballColor = e.target.value;
+            });
+
+            document.getElementById('paddleSize').addEventListener('input', (e) => {
+                config.paddleHeight = parseInt(e.target.value);
+                document.getElementById('paddleSizeValue').textContent = config.paddleHeight;
+                player.height = config.paddleHeight;
+                ai.height = config.paddleHeight;
+            });
+        }
+
+        // Reset ball
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.speed = config.ballSpeed;
+            ball.dx = (Math.random() > 0.5 ? 1 : -1) * ball.speed;
+            ball.dy = (Math.random() * 1.2 - 0.6) * ball.speed;
+        }
+
+        // Reset entire game
+        function resetGame() {
+            player.score = 0;
+            ai.score = 0;
+            resetBall();
+            updateScoreDisplay();
+        }
+
+        // Update score display
+        function updateScoreDisplay() {
+            document.getElementById('playerScoreDisplay').textContent = player.score;
+            document.getElementById('aiScoreDisplay').textContent = ai.score;
+        }
+
+        // Player movement
+        function movePlayer() {
+            if (keys['w'] || keys['W'] || keys['ArrowUp']) {
+                player.dy = -config.playerSpeed;
+            } else if (keys['s'] || keys['S'] || keys['ArrowDown']) {
+                player.dy = config.playerSpeed;
+            } else {
+                player.dy = 0;
+            }
+
+            player.y += player.dy;
+
+            // Keep player paddle on screen
+            if (player.y < 0) {
+                player.y = 0;
+            } else if (player.y + player.height > canvas.height) {
+                player.y = canvas.height - player.height;
+            }
+        }
+
+        // AI movement
+        function moveAI() {
+            const aiCenter = ai.y + ai.height / 2;
+            const ballCenter = ball.y + ball.size / 2;
+            
+            if (aiCenter < ballCenter - 20) {
+                ai.dy = config.aiSpeed;
+            } else if (aiCenter > ballCenter + 20) {
+                ai.dy = -config.aiSpeed;
+            } else {
+                ai.dy = 0;
+            }
+
+            ai.y += ai.dy;
+
+            // Keep AI paddle on screen
+            if (ai.y < 0) {
+                ai.y = 0;
+            } else if (ai.y + ai.height > canvas.height) {
+                ai.y = canvas.height - ai.height;
+            }
+        }
+
+        // Ball movement and collision
+        function moveBall() {
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // Ball collision with top and bottom walls
+            if (ball.y <= 0 || ball.y + ball.size >= canvas.height) {
+                ball.dy *= -1;
+            }
+
+            // Ball collision with player paddle
+            if (
+                ball.x <= player.x + player.width &&
+                ball.y + ball.size >= player.y &&
+                ball.y <= player.y + player.height &&
+                ball.dx < 0
+            ) {
+                // Calculate where on the paddle the ball hit (for angle variation)
+                const hitPosition = (ball.y + ball.size/2 - player.y) / player.height;
+                const angle = (hitPosition - 0.5) * Math.PI/2; // Angle between -45 and 45 degrees
+                
+                ball.dx = Math.cos(angle) * (ball.speed + config.ballAcceleration);
+                ball.dy = Math.sin(angle) * (ball.speed + config.ballAcceleration);
+                ball.dx = Math.abs(ball.dx); // Ensure ball goes to the right
+                ball.speed += config.ballAcceleration;
+            }
+
+            // Ball collision with AI paddle
+            if (
+                ball.x + ball.size >= ai.x &&
+                ball.y + ball.size >= ai.y &&
+                ball.y <= ai.y + ai.height &&
+                ball.dx > 0
+            ) {
+                const hitPosition = (ball.y + ball.size/2 - ai.y) / ai.height;
+                const angle = (hitPosition - 0.5) * Math.PI/2;
+                
+                ball.dx = -Math.cos(angle) * (ball.speed + config.ballAcceleration);
+                ball.dy = Math.sin(angle) * (ball.speed + config.ballAcceleration);
+                ball.dx = -Math.abs(ball.dx); // Ensure ball goes to the left
+                ball.speed += config.ballAcceleration;
+            }
+
+            // Score points
+            if (ball.x + ball.size < 0) {
+                // AI scores
+                ai.score++;
+                updateScoreDisplay();
+                resetBall();
+            } else if (ball.x > canvas.width) {
+                // Player scores
+                player.score++;
+                updateScoreDisplay();
+                resetBall();
+            }
+        }
+
+        // Draw everything
+        function draw() {
+            // Clear canvas with configurable background color
+            ctx.fillStyle = config.backgroundColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw center line
+            ctx.strokeStyle = '#ffffff33'; // Semi-transparent white
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw scores
+            ctx.font = '48px Arial';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.fillText(player.score, canvas.width / 4, 60);
+            ctx.fillText(ai.score, 3 * canvas.width / 4, 60);
+
+            // Draw player paddle with configurable color
+            ctx.fillStyle = config.paddleColor;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Draw AI paddle with configurable color
+            ctx.fillStyle = config.paddleColor;
+            ctx.fillRect(ai.x, ai.y, ai.width, ai.height);
+
+            // Draw ball with configurable color
+            ctx.fillStyle = config.ballColor;
+            ctx.beginPath();
+            ctx.arc(
+                ball.x + ball.size / 2,
+                ball.y + ball.size / 2,
+                ball.size / 2,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (!isPaused) {
+                movePlayer();
+                moveAI();
+                moveBall();
+            }
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize
+        setupConfigListeners();
+        resetBall();
+        gameLoop();
+    </script>
 </body>
 </html>
