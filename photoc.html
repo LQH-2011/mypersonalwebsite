@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Compresor de Imágenes</title>
+    <style>
+        :root {
+            --bg: #f4f5f7;
+            --card-bg: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-dashed: #cbd5e1;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --danger: #ef4444;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
+            --transition: 0.2s ease;
+            --settings-btn-size: 44px;
+            --settings-panel-width: 280px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 30%, #fdf2f8 70%, #f5f3ff 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background 0.4s ease;
+            position: relative;
+        }
+
+        /* Settings Button */
+        .settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: var(--settings-btn-size);
+            height: var(--settings-btn-size);
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            box-shadow: var(--shadow);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 200;
+            transition: transform 0.2s, background 0.2s, border-color 0.2s;
+            color: var(--text);
+        }
+        .settings-btn:hover {
+            transform: rotate(30deg);
+            background: #f8fafc;
+            border-color: var(--primary);
+        }
+        .settings-btn:active {
+            transform: rotate(45deg) scale(0.95);
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: var(--settings-panel-width);
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12), 0 5px 15px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+            padding: 20px;
+            z-index: 190;
+            transform: translateX(calc(var(--settings-panel-width) + 40px));
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+            pointer-events: none;
+        }
+        .settings-panel.open {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .settings-panel .panel-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 18px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .settings-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+        .settings-row label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+        }
+        .settings-row select,
+        .settings-row input[type="color"] {
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: #fff;
+            cursor: pointer;
+            width: 100%;
+            color: var(--text);
+            transition: var(--transition);
+        }
+        .settings-row input[type="color"] {
+            height: 42px;
+            padding: 5px;
+        }
+        .settings-row select:focus,
+        .settings-row input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+        }
+        .close-settings-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 100%;
+            transition: var(--transition);
+        }
+        .close-settings-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: var(--text);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .header .icon-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .header .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 28px 30px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--border-dashed);
+            border-radius: var(--radius-sm);
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: #fafbfc;
+            position: relative;
+        }
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--primary);
+            background: #f5f6ff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.06);
+        }
+        .drop-zone .drop-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+            opacity: 0.8;
+        }
+        .drop-zone .drop-text {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .drop-zone .drop-hint {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Preview Area */
+        .preview-area {
+            display: none;
+            margin-top: 20px;
+            gap: 20px;
+        }
+        .preview-area.active {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .preview-panel {
+            flex: 1 1 240px;
+            min-width: 200px;
+            text-align: center;
+            background: #fafbfc;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+        .preview-panel .panel-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        .preview-panel img {
+            max-width: 100%;
+            max-height: 220px;
+            border-radius: 8px;
+            object-fit: contain;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            display: block;
+            margin: 0 auto;
+        }
+        .preview-panel .file-info {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+        .preview-panel .file-info .size {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .preview-panel .file-info .saved {
+            display: inline-block;
+            background: var(--success-bg);
+            color: var(--success);
+            font-weight: 600;
+            font-size: 0.78rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-top: 4px;
+        }
+
+        /* Controls */
+        .controls {
+            display: none;
+            margin-top: 20px;
+            gap: 18px;
+            flex-direction: column;
+        }
+        .controls.active {
+            display: flex;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .control-row label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text);
+            min-width: 80px;
+        }
+        .control-row input[type="range"] {
+            flex: 1;
+            min-width: 150px;
+            accent-color: var(--primary);
+            height: 6px;
+            cursor: pointer;
+        }
+        .control-row .quality-value {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--primary);
+            min-width: 38px;
+            text-align: right;
+        }
+        .format-select {
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: #fff;
+            cursor: pointer;
+            color: var(--text);
+            min-width: 120px;
+            transition: var(--transition);
+        }
+        .format-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+        }
+
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .btn {
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            letter-spacing: -0.01em;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            justify-content: center;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: #fff;
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        .btn-danger {
+            background: #fff;
+            color: var(--danger);
+            border: 1.5px solid #fecaca;
+        }
+        .btn-danger:hover {
+            background: #fef2f2;
+            border-color: #f87171;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 0.88rem;
+            z-index: 999;
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.success {
+            background: #059669;
+        }
+        .toast.error {
+            background: #dc2626;
+        }
+
+        /* Responsive */
+        @media (max-width: 520px) {
+            .card {
+                padding: 18px 14px;
+            }
+            .drop-zone {
+                padding: 28px 16px;
+            }
+            .preview-area {
+                gap: 12px;
+            }
+            .preview-panel {
+                flex: 1 1 100%;
+                min-width: 100%;
+            }
+            .btn-row {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .control-row label {
+                min-width: auto;
+            }
+            .settings-panel {
+                width: calc(100vw - 40px);
+                right: 10px;
+                top: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Settings Gear Button -->
+    <button class="settings-btn" id="settingsBtn" title="Configuración" aria-label="Abrir configuración">⚙️</button>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="panel-title" id="settingsTitle">⚙️ Configuración</div>
+        <div class="settings-row">
+            <label for="langSelect" id="langLabel">Idioma</label>
+            <select id="langSelect">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+                <option value="de">Deutsch</option>
+                <option value="zh-CN">中文（简体）</option>
+                <option value="zh-TW">中文（繁體）</option>
+            </select>
+        </div>
+        <div class="settings-row">
+            <label for="bgColorPicker" id="bgColorLabel">Color de fondo</label>
+            <input type="color" id="bgColorPicker" value="#f0f4ff">
+        </div>
+        <button class="close-settings-btn" id="closeSettingsBtn">Cerrar</button>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="icon-wrapper">🖼️</div>
+            <h1 id="headerTitle">Compresor de Imágenes</h1>
+            <p class="subtitle" id="headerSubtitle">Reduce el tamaño de tus fotos sin perder calidad visible</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card">
+            <!-- Drop Zone -->
+            <div class="drop-zone" id="dropZone">
+                <span class="drop-icon">📁</span>
+                <p class="drop-text" id="dropText">Arrastra y suelta tu imagen aquí</p>
+                <p class="drop-hint" id="dropHint">o haz clic para seleccionar un archivo — JPEG, PNG, WebP</p>
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff">
+            </div>
+
+            <!-- Preview Area -->
+            <div class="preview-area" id="previewArea">
+                <div class="preview-panel" id="originalPanel">
+                    <p class="panel-label" id="originalLabel">📷 Original</p>
+                    <img id="originalImage" src="" alt="Imagen original">
+                    <p class="file-info" id="originalInfo"></p>
+                </div>
+                <div class="preview-panel" id="compressedPanel">
+                    <p class="panel-label" id="compressedLabel">✨ Comprimida</p>
+                    <img id="compressedImage" src="" alt="Imagen comprimida">
+                    <p class="file-info" id="compressedInfo"></p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls" id="controls">
+                <div class="control-row">
+                    <label for="qualitySlider" id="qualityLabel">🗜️ Calidad:</label>
+                    <input type="range" id="qualitySlider" min="10" max="100" value="75" step="1">
+                    <span class="quality-value" id="qualityValue">75%</span>
+                </div>
+                <div class="control-row">
+                    <label for="formatSelect" id="formatLabel">📐 Formato:</label>
+                    <select class="format-select" id="formatSelect">
+                        <!-- Options filled dynamically -->
+                    </select>
+                    <span id="formatHint" style="font-size:0.78rem;color:var(--text-secondary);">(recomendado: JPEG o WebP)</span>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-primary" id="btnDownload">💾 Descargar imagen comprimida</button>
+                    <button class="btn btn-outline" id="btnReset">🔄 Reiniciar</button>
+                    <button class="btn btn-danger" id="btnClear">✕ Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            // ---- Translations (extended with German, Simplified Chinese, Traditional Chinese) ----
+            const translations = {
+                es: {
+                    title: "Compresor de Imágenes",
+                    subtitle: "Reduce el tamaño de tus fotos sin perder calidad visible",
+                    dropText: "Arrastra y suelta tu imagen aquí",
+                    dropHint: "o haz clic para seleccionar un archivo — JPEG, PNG, WebP",
+                    originalLabel: "📷 Original",
+                    compressedLabel: "✨ Comprimida",
+                    qualityLabel: "🗜️ Calidad:",
+                    formatLabel: "📐 Formato:",
+                    formatJpeg: "JPEG (.jpg)",
+                    formatPng: "PNG (.png)",
+                    formatWebp: "WebP (.webp)",
+                    formatHint: "(recomendado: JPEG o WebP)",
+                    btnDownload: "💾 Descargar imagen comprimida",
+                    btnReset: "🔄 Reiniciar",
+                    btnClear: "✕ Eliminar",
+                    processing: "Procesando…",
+                    noReduction: "Sin reducción significativa con esta configuración",
+                    reductionSaved: "▼ {reduction}% ahorrado ({savedSize} menos)",
+                    pixels: "píxeles",
+                    sizeUnknown: "Desconocido",
+                    toastInvalidImage: "Por favor, selecciona un archivo de imagen válido.",
+                    toastCompressError: "Error al comprimir la imagen. Inténtalo de nuevo.",
+                    toastNoImage: "No hay imagen comprimida para descargar.",
+                    toastDownloadSuccess: "✅ Imagen descargada correctamente.",
+                    toastReset: "Ajustes reiniciados. Calidad: 75%",
+                    toastCleared: "Todo limpio. Listo para una nueva imagen.",
+                    settingsTitle: "⚙️ Configuración",
+                    langLabel: "Idioma",
+                    bgColorLabel: "Color de fondo",
+                    closeSettings: "Cerrar",
+                    pageTitle: "Compresor de Imágenes"
+                },
+                en: {
+                    title: "Image Compressor",
+                    subtitle: "Reduce the size of your photos without losing visible quality",
+                    dropText: "Drag and drop your image here",
+                    dropHint: "or click to select a file — JPEG, PNG, WebP",
+                    originalLabel: "📷 Original",
+                    compressedLabel: "✨ Compressed",
+                    qualityLabel: "🗜️ Quality:",
+                    formatLabel: "📐 Format:",
+                    formatJpeg: "JPEG (.jpg)",
+                    formatPng: "PNG (.png)",
+                    formatWebp: "WebP (.webp)",
+                    formatHint: "(recommended: JPEG or WebP)",
+                    btnDownload: "💾 Download compressed image",
+                    btnReset: "🔄 Reset",
+                    btnClear: "✕ Clear",
+                    processing: "Processing…",
+                    noReduction: "No significant reduction with this setting",
+                    reductionSaved: "▼ {reduction}% saved ({savedSize} less)",
+                    pixels: "pixels",
+                    sizeUnknown: "Unknown",
+                    toastInvalidImage: "Please select a valid image file.",
+                    toastCompressError: "Error compressing image. Please try again.",
+                    toastNoImage: "No compressed image to download.",
+                    toastDownloadSuccess: "✅ Image downloaded successfully.",
+                    toastReset: "Settings reset. Quality: 75%",
+                    toastCleared: "All clean. Ready for a new image.",
+                    settingsTitle: "⚙️ Settings",
+                    langLabel: "Language",
+                    bgColorLabel: "Background color",
+                    closeSettings: "Close",
+                    pageTitle: "Image Compressor"
+                },
+                de: {
+                    title: "Bildkompressor",
+                    subtitle: "Reduzieren Sie die Größe Ihrer Fotos ohne sichtbaren Qualitätsverlust",
+                    dropText: "Ziehen Sie Ihr Bild hierher",
+                    dropHint: "oder klicken Sie, um eine Datei auszuwählen — JPEG, PNG, WebP",
+                    originalLabel: "📷 Original",
+                    compressedLabel: "✨ Komprimiert",
+                    qualityLabel: "🗜️ Qualität:",
+                    formatLabel: "📐 Format:",
+                    formatJpeg: "JPEG (.jpg)",
+                    formatPng: "PNG (.png)",
+                    formatWebp: "WebP (.webp)",
+                    formatHint: "(empfohlen: JPEG oder WebP)",
+                    btnDownload: "💾 Komprimiertes Bild herunterladen",
+                    btnReset: "🔄 Zurücksetzen",
+                    btnClear: "✕ Löschen",
+                    processing: "Wird bearbeitet…",
+                    noReduction: "Keine signifikante Reduzierung mit dieser Einstellung",
+                    reductionSaved: "▼ {reduction}% gespart ({savedSize} weniger)",
+                    pixels: "Pixel",
+                    sizeUnknown: "Unbekannt",
+                    toastInvalidImage: "Bitte wählen Sie eine gültige Bilddatei aus.",
+                    toastCompressError: "Fehler beim Komprimieren. Bitte versuchen Sie es erneut.",
+                    toastNoImage: "Kein komprimiertes Bild zum Herunterladen.",
+                    toastDownloadSuccess: "✅ Bild erfolgreich heruntergeladen.",
+                    toastReset: "Einstellungen zurückgesetzt. Qualität: 75%",
+                    toastCleared: "Alles sauber. Bereit für ein neues Bild.",
+                    settingsTitle: "⚙️ Einstellungen",
+                    langLabel: "Sprache",
+                    bgColorLabel: "Hintergrundfarbe",
+                    closeSettings: "Schließen",
+                    pageTitle: "Bildkompressor"
+                },
+                "zh-CN": {
+                    title: "图片压缩器",
+                    subtitle: "减小照片体积，不损失可见质量",
+                    dropText: "将图片拖放到此处",
+                    dropHint: "或点击选择文件 — JPEG、PNG、WebP",
+                    originalLabel: "📷 原始",
+                    compressedLabel: "✨ 压缩后",
+                    qualityLabel: "🗜️ 质量：",
+                    formatLabel: "📐 格式：",
+                    formatJpeg: "JPEG (.jpg)",
+                    formatPng: "PNG (.png)",
+                    formatWebp: "WebP (.webp)",
+                    formatHint: "（推荐：JPEG 或 WebP）",
+                    btnDownload: "💾 下载压缩图片",
+                    btnReset: "🔄 重置",
+                    btnClear: "✕ 清除",
+                    processing: "处理中…",
+                    noReduction: "当前设置下无明显压缩效果",
+                    reductionSaved: "▼ 节省了 {reduction}%（减少 {savedSize}）",
+                    pixels: "像素",
+                    sizeUnknown: "未知",
+                    toastInvalidImage: "请选择有效的图片文件。",
+                    toastCompressError: "压缩图片时出错，请重试。",
+                    toastNoImage: "没有可下载的压缩图片。",
+                    toastDownloadSuccess: "✅ 图片下载成功。",
+                    toastReset: "设置已重置。质量：75%",
+                    toastCleared: "已清空，可以上传新图片。",
+                    settingsTitle: "⚙️ 设置",
+                    langLabel: "语言",
+                    bgColorLabel: "背景颜色",
+                    closeSettings: "关闭",
+                    pageTitle: "图片压缩器"
+                },
+                "zh-TW": {
+                    title: "圖片壓縮器",
+                    subtitle: "減小照片體積，不損失可見品質",
+                    dropText: "將圖片拖放到此處",
+                    dropHint: "或點擊選擇檔案 — JPEG、PNG、WebP",
+                    originalLabel: "📷 原始",
+                    compressedLabel: "✨ 壓縮後",
+                    qualityLabel: "🗜️ 品質：",
+                    formatLabel: "📐 格式：",
+                    formatJpeg: "JPEG (.jpg)",
+                    formatPng: "PNG (.png)",
+                    formatWebp: "WebP (.webp)",
+                    formatHint: "（建議：JPEG 或 WebP）",
+                    btnDownload: "💾 下載壓縮圖片",
+                    btnReset: "🔄 重設",
+                    btnClear: "✕ 清除",
+                    processing: "處理中…",
+                    noReduction: "目前設定下無明顯壓縮效果",
+                    reductionSaved: "▼ 節省了 {reduction}%（減少 {savedSize}）",
+                    pixels: "像素",
+                    sizeUnknown: "未知",
+                    toastInvalidImage: "請選擇有效的圖片檔案。",
+                    toastCompressError: "壓縮圖片時發生錯誤，請重試。",
+                    toastNoImage: "沒有可下載的壓縮圖片。",
+                    toastDownloadSuccess: "✅ 圖片下載成功。",
+                    toastReset: "設定已重設。品質：75%",
+                    toastCleared: "已清空，可以上傳新圖片。",
+                    settingsTitle: "⚙️ 設定",
+                    langLabel: "語言",
+                    bgColorLabel: "背景顏色",
+                    closeSettings: "關閉",
+                    pageTitle: "圖片壓縮器"
+                }
+            };
+
+            // ---- State ----
+            let currentLang = 'es';
+            let originalFile = null;
+            let originalDataURL = null;
+            let compressedBlob = null;
+            let compressedDataURL = null;
+            let originalImgElement = null;
+            let currentFormat = 'image/jpeg'; // default
+
+            // ---- DOM Elements ----
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsPanel = document.getElementById('settingsPanel');
+            const langSelect = document.getElementById('langSelect');
+            const bgColorPicker = document.getElementById('bgColorPicker');
+            const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const previewArea = document.getElementById('previewArea');
+            const originalImage = document.getElementById('originalImage');
+            const compressedImage = document.getElementById('compressedImage');
+            const originalInfo = document.getElementById('originalInfo');
+            const compressedInfo = document.getElementById('compressedInfo');
+            const controls = document.getElementById('controls');
+            const qualitySlider = document.getElementById('qualitySlider');
+            const qualityValue = document.getElementById('qualityValue');
+            const formatSelect = document.getElementById('formatSelect');
+            const btnDownload = document.getElementById('btnDownload');
+            const btnReset = document.getElementById('btnReset');
+            const btnClear = document.getElementById('btnClear');
+            const toast = document.getElementById('toast');
+
+            // Elements with text content
+            const i18nElements = {
+                headerTitle: document.getElementById('headerTitle'),
+                headerSubtitle: document.getElementById('headerSubtitle'),
+                dropText: document.getElementById('dropText'),
+                dropHint: document.getElementById('dropHint'),
+                originalLabel: document.getElementById('originalLabel'),
+                compressedLabel: document.getElementById('compressedLabel'),
+                qualityLabel: document.getElementById('qualityLabel'),
+                formatLabel: document.getElementById('formatLabel'),
+                formatHint: document.getElementById('formatHint'),
+                btnDownload: btnDownload,
+                btnReset: btnReset,
+                btnClear: btnClear,
+                settingsTitle: document.getElementById('settingsTitle'),
+                langLabel: document.getElementById('langLabel'),
+                bgColorLabel: document.getElementById('bgColorLabel'),
+                closeSettingsBtn: closeSettingsBtn,
+                pageTitle: document.querySelector('title')
+            };
+
+            // ---- Helper: Translate ----
+            function t(key, params = {}) {
+                const langPack = translations[currentLang] || translations['es'];
+                let text = langPack[key] || translations['es'][key] || key;
+                for (const [k, v] of Object.entries(params)) {
+                    text = text.replace(`{${k}}`, v);
+                }
+                return text;
+            }
+
+            // ---- Update all static texts ----
+            function updateStaticTexts() {
+                i18nElements.headerTitle.textContent = t('title');
+                i18nElements.headerSubtitle.textContent = t('subtitle');
+                i18nElements.dropText.textContent = t('dropText');
+                i18nElements.dropHint.textContent = t('dropHint');
+                i18nElements.originalLabel.textContent = t('originalLabel');
+                i18nElements.compressedLabel.textContent = t('compressedLabel');
+                i18nElements.qualityLabel.textContent = t('qualityLabel');
+                i18nElements.formatLabel.textContent = t('formatLabel');
+                i18nElements.formatHint.textContent = t('formatHint');
+                i18nElements.btnDownload.textContent = t('btnDownload');
+                i18nElements.btnReset.textContent = t('btnReset');
+                i18nElements.btnClear.textContent = t('btnClear');
+                i18nElements.settingsTitle.textContent = t('settingsTitle');
+                i18nElements.langLabel.textContent = t('langLabel');
+                i18nElements.bgColorLabel.textContent = t('bgColorLabel');
+                i18nElements.closeSettingsBtn.textContent = t('closeSettings');
+                i18nElements.pageTitle.textContent = t('pageTitle');
+                // Update format select options
+                updateFormatSelectOptions();
+                // Update dynamic info texts if they contain translatable strings
+                if (compressedInfo.innerHTML.includes('Procesando') || compressedInfo.innerHTML.includes('Processing') || compressedInfo.innerHTML.includes('Wird bearbeitet') || compressedInfo.innerHTML.includes('处理中') || compressedInfo.innerHTML.includes('處理中')) {
+                    compressedInfo.innerHTML = `<span style="color:#94a3b8;">${t('processing')}</span>`;
+                }
+                updateOriginalInfoAfterLanguageChange();
+            }
+
+            function updateOriginalInfoAfterLanguageChange() {
+                if (originalFile && originalImgElement) {
+                    const dims = getImageDimensions(originalImgElement);
+                    let infoHTML = `<span class="size">${formatSize(originalFile.size)}</span>`;
+                    if (dims) {
+                        infoHTML += `<br><span style="font-size:0.78rem;color:var(--text-secondary);">${dims.width} × ${dims.height} ${t('pixels')}</span>`;
+                    }
+                    infoHTML += `<br><span style="font-size:0.75rem;color:var(--text-secondary);">${originalFile.type || t('sizeUnknown')}</span>`;
+                    originalInfo.innerHTML = infoHTML;
+                }
+            }
+
+            function updateFormatSelectOptions() {
+                const selectedValue = formatSelect.value || currentFormat;
+                formatSelect.innerHTML = '';
+                const formats = [
+                    { value: 'image/jpeg', text: t('formatJpeg') },
+                    { value: 'image/png', text: t('formatPng') },
+                    { value: 'image/webp', text: t('formatWebp') }
+                ];
+                formats.forEach(f => {
+                    const option = document.createElement('option');
+                    option.value = f.value;
+                    option.textContent = f.text;
+                    formatSelect.appendChild(option);
+                });
+                if ([...formatSelect.options].some(opt => opt.value === selectedValue)) {
+                    formatSelect.value = selectedValue;
+                } else {
+                    formatSelect.value = 'image/jpeg';
+                }
+                currentFormat = formatSelect.value;
+            }
+
+            // ---- Language management ----
+            function setLanguage(lang) {
+                if (!translations[lang]) lang = 'es';
+                currentLang = lang;
+                localStorage.setItem('photoCompressorLang', lang);
+                langSelect.value = lang;
+                updateStaticTexts();
+                if (compressedBlob) {
+                    updateCompressedInfo();
+                }
+                if (originalFile && originalImgElement) {
+                    updateOriginalInfoAfterLanguageChange();
+                }
+            }
+
+            function detectInitialLanguage() {
+                const saved = localStorage.getItem('photoCompressorLang');
+                if (saved && translations[saved]) return saved;
+
+                const rawLang = (navigator.language || navigator.userLanguage || 'es').trim();
+                const full = rawLang.toLowerCase();
+                // Direct matches
+                if (translations[full]) return full;
+                // Handle Chinese variants
+                if (full.startsWith('zh')) {
+                    if (full.includes('tw') || full.includes('hant') || full.includes('hk')) return 'zh-TW';
+                    return 'zh-CN'; // default simplified
+                }
+                // Check primary subtag
+                const primary = full.split('-')[0];
+                if (primary === 'de') return 'de';
+                if (primary === 'en') return 'en';
+                return 'es';
+            }
+
+            // ---- Background color ----
+            function applyBackgroundColor(color) {
+                document.body.style.background = color;
+                localStorage.setItem('photoCompressorBg', color);
+            }
+
+            function loadBackgroundColor() {
+                const saved = localStorage.getItem('photoCompressorBg');
+                if (saved) {
+                    document.body.style.background = saved;
+                    bgColorPicker.value = saved;
+                } else {
+                    bgColorPicker.value = '#f0f4ff'; // default
+                }
+            }
+
+            // ---- Settings Panel toggle ----
+            function toggleSettingsPanel(force) {
+                const isOpen = settingsPanel.classList.contains('open');
+                const newState = typeof force === 'boolean' ? force : !isOpen;
+                if (newState) {
+                    settingsPanel.classList.add('open');
+                } else {
+                    settingsPanel.classList.remove('open');
+                }
+            }
+
+            function closeSettingsPanel() {
+                settingsPanel.classList.remove('open');
+            }
+
+            // Click outside to close
+            document.addEventListener('click', function(e) {
+                if (settingsPanel.classList.contains('open') &&
+                    !settingsPanel.contains(e.target) &&
+                    e.target !== settingsBtn) {
+                    closeSettingsPanel();
+                }
+            });
+
+            settingsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleSettingsPanel();
+            });
+
+            closeSettingsBtn.addEventListener('click', closeSettingsPanel);
+
+            // Language select change
+            langSelect.addEventListener('change', function() {
+                setLanguage(this.value);
+            });
+
+            // Background color change
+            bgColorPicker.addEventListener('input', function() {
+                applyBackgroundColor(this.value);
+            });
+
+            // ---- File size formatting ----
+            function formatSize(bytes) {
+                if (bytes === 0 || bytes === null || bytes === undefined) return '0 B';
+                const units = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(1024));
+                const size = (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1);
+                return size + ' ' + units[i];
+            }
+
+            function getImageDimensions(imgEl) {
+                if (imgEl && imgEl.naturalWidth && imgEl.naturalHeight) {
+                    return { width: imgEl.naturalWidth, height: imgEl.naturalHeight };
+                }
+                return null;
+            }
+
+            // ---- Compress Image ----
+            function compressImage(quality, format) {
+                if (!originalImgElement) return;
+                const dims = getImageDimensions(originalImgElement);
+                if (!dims) return;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = dims.width;
+                canvas.height = dims.height;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(originalImgElement, 0, 0, canvas.width, canvas.height);
+
+                const q = quality / 100;
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) {
+                            showToast(t('toastCompressError'), 'error');
+                            return;
+                        }
+                        compressedBlob = blob;
+                        const url = URL.createObjectURL(blob);
+                        if (compressedDataURL && compressedDataURL.startsWith('blob:')) {
+                            URL.revokeObjectURL(compressedDataURL);
+                        }
+                        compressedDataURL = url;
+                        compressedImage.src = url;
+                        updateCompressedInfo();
+                    },
+                    format,
+                    q
+                );
+            }
+
+            function updateCompressedInfo() {
+                if (compressedBlob) {
+                    const compSize = compressedBlob.size;
+                    const origSize = originalFile ? originalFile.size : 0;
+                    let html = `<span class="size">${formatSize(compSize)}</span>`;
+                    if (origSize > 0 && compSize < origSize) {
+                        const reduction = Math.round((1 - compSize / origSize) * 100);
+                        const savedSize = formatSize(origSize - compSize);
+                        html += `<br><span class="saved">${t('reductionSaved', { reduction, savedSize })}</span>`;
+                    } else if (origSize > 0 && compSize >= origSize) {
+                        html += `<br><span style="color:#f59e0b;font-size:0.78rem;">${t('noReduction')}</span>`;
+                    }
+                    compressedInfo.innerHTML = html;
+                    btnDownload.disabled = false;
+                } else {
+                    compressedInfo.innerHTML = `<span style="color:#94a3b8;">${t('processing')}</span>`;
+                    btnDownload.disabled = true;
+                }
+            }
+
+            // ---- Load original image ----
+            function loadOriginalImage(file) {
+                originalFile = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    originalDataURL = e.target.result;
+                    originalImage.src = originalDataURL;
+
+                    const img = new Image();
+                    img.onload = function() {
+                        originalImgElement = img;
+                        const dims = getImageDimensions(img);
+                        let infoHTML = `<span class="size">${formatSize(file.size)}</span>`;
+                        if (dims) {
+                            infoHTML += `<br><span style="font-size:0.78rem;color:var(--text-secondary);">${dims.width} × ${dims.height} ${t('pixels')}</span>`;
+                        }
+                        infoHTML += `<br><span style="font-size:0.75rem;color:var(--text-secondary);">${file.type || t('sizeUnknown')}</span>`;
+                        originalInfo.innerHTML = infoHTML;
+
+                        // Set format based on file type
+                        if (file.type === 'image/png') {
+                            formatSelect.value = 'image/png';
+                        } else if (file.type === 'image/webp') {
+                            formatSelect.value = 'image/webp';
+                        } else {
+                            formatSelect.value = 'image/jpeg';
+                        }
+                        currentFormat = formatSelect.value;
+
+                        compressImage(parseInt(qualitySlider.value), formatSelect.value);
+
+                        previewArea.classList.add('active');
+                        controls.classList.add('active');
+                    };
+                    img.src = originalDataURL;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function handleFile(file) {
+                if (!file) return;
+                if (!file.type.startsWith('image/')) {
+                    showToast(t('toastInvalidImage'), 'error');
+                    return;
+                }
+                if (compressedDataURL && compressedDataURL.startsWith('blob:')) {
+                    URL.revokeObjectURL(compressedDataURL);
+                    compressedDataURL = null;
+                }
+                compressedBlob = null;
+                compressedImage.src = '';
+                compressedInfo.innerHTML = `<span style="color:#94a3b8;">${t('processing')}</span>`;
+                btnDownload.disabled = true;
+                loadOriginalImage(file);
+            }
+
+            // ---- Toast ----
+            let toastTimer;
+            function showToast(message, type = '') {
+                clearTimeout(toastTimer);
+                toast.textContent = message;
+                toast.className = 'toast ' + type + ' show';
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2500);
+            }
+
+            // ---- Event Listeners ----
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                }
+            });
+
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('drag-over');
+            });
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('drag-over');
+            });
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('drag-over');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            qualitySlider.addEventListener('input', function() {
+                const val = parseInt(qualitySlider.value);
+                qualityValue.textContent = val + '%';
+                if (originalImgElement) {
+                    compressImage(val, formatSelect.value);
+                }
+            });
+
+            formatSelect.addEventListener('change', function() {
+                currentFormat = formatSelect.value;
+                if (originalImgElement) {
+                    compressImage(parseInt(qualitySlider.value), formatSelect.value);
+                }
+            });
+
+            btnDownload.addEventListener('click', function() {
+                if (!compressedBlob) {
+                    showToast(t('toastNoImage'), 'error');
+                    return;
+                }
+                const url = URL.createObjectURL(compressedBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                const originalName = originalFile ? originalFile.name.replace(/\.[^.]+$/, '') : 'imagen';
+                let extension = '.jpg';
+                const fmt = formatSelect.value;
+                if (fmt === 'image/png') extension = '.png';
+                else if (fmt === 'image/webp') extension = '.webp';
+                const quality = parseInt(qualitySlider.value);
+                a.download = `${originalName}_compressed_q${quality}${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                showToast(t('toastDownloadSuccess'), 'success');
+            });
+
+            btnReset.addEventListener('click', function() {
+                qualitySlider.value = 75;
+                qualityValue.textContent = '75%';
+                formatSelect.value = originalFile && originalFile.type === 'image/png' ? 'image/png' :
+                                     originalFile && originalFile.type === 'image/webp' ? 'image/webp' : 'image/jpeg';
+                currentFormat = formatSelect.value;
+                if (originalImgElement) {
+                    compressImage(75, formatSelect.value);
+                    showToast(t('toastReset'), '');
+                }
+            });
+
+            btnClear.addEventListener('click', function() {
+                if (compressedDataURL && compressedDataURL.startsWith('blob:')) {
+                    URL.revokeObjectURL(compressedDataURL);
+                }
+                originalFile = null;
+                originalDataURL = null;
+                compressedBlob = null;
+                compressedDataURL = null;
+                originalImgElement = null;
+                originalImage.src = '';
+                compressedImage.src = '';
+                originalInfo.innerHTML = '';
+                compressedInfo.innerHTML = '';
+                qualitySlider.value = 75;
+                qualityValue.textContent = '75%';
+                formatSelect.value = 'image/jpeg';
+                currentFormat = 'image/jpeg';
+                btnDownload.disabled = true;
+                previewArea.classList.remove('active');
+                controls.classList.remove('active');
+                fileInput.value = '';
+                showToast(t('toastCleared'), '');
+            });
+
+            // ---- Initialization ----
+            function init() {
+                const initLang = detectInitialLanguage();
+                setLanguage(initLang);
+                langSelect.value = initLang;
+                loadBackgroundColor();
+
+                btnDownload.disabled = true;
+                compressedInfo.innerHTML = `<span style="color:#94a3b8;">—</span>`;
+                originalInfo.innerHTML = `<span style="color:#94a3b8;">—</span>`;
+                qualityValue.textContent = '75%';
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
