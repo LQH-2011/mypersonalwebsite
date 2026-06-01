@@ -30,7 +30,6 @@
             display: block;
         }
 
-        /* Settings Button (Cog Icon) */
         .settings-btn {
             position: absolute;
             top: 10px;
@@ -67,7 +66,6 @@
             transition: transform 0.3s ease;
         }
 
-        /* Overlay for blurred background */
         .overlay {
             position: absolute;
             top: 0;
@@ -88,7 +86,6 @@
             pointer-events: all;
         }
 
-        /* Config Panel - Centered Modal */
         .config-panel {
             position: fixed;
             top: 50%;
@@ -96,9 +93,9 @@
             transform: translate(-50%, -50%) scale(0.8);
             background: rgba(30, 30, 30, 0.98);
             border-radius: 15px;
-            padding: 30px;
-            width: 300px;
-            max-height: 80vh;
+            padding: 25px;
+            width: 350px;
+            max-height: 85vh;
             overflow-y: auto;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -115,7 +112,7 @@
         }
 
         .config-panel h2 {
-            margin: 0 0 25px 0;
+            margin: 0 0 20px 0;
             text-align: center;
             color: #4CAF50;
             font-size: 22px;
@@ -124,16 +121,15 @@
         }
 
         .config-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .config-group label {
-            display: block;
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 5px;
             color: #aaa;
             font-size: 13px;
-            display: flex;
-            justify-content: space-between;
         }
 
         .config-group input[type="range"] {
@@ -182,51 +178,52 @@
             font-weight: bold;
         }
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
+        select {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
         }
 
-        .reset-btn {
-            flex: 1;
-            padding: 12px;
-            background: #4CAF50;
-            color: white;
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .button-grid button,
+        .full-width-btn {
+            padding: 10px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             transition: all 0.3s;
-        }
-
-        .reset-btn:hover {
-            background: #45a049;
-            transform: translateY(-1px);
-        }
-
-        .resume-btn {
-            flex: 1;
-            padding: 12px;
-            background: #2196F3;
             color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s;
         }
 
-        .resume-btn:hover {
-            background: #1976D2;
+        .reset-btn { background: #f44336; }
+        .resume-btn { background: #2196F3; }
+        .save-btn { background: #4CAF50; }
+        .load-btn { background: #FF9800; }
+        .clear-btn { background: #9C27B0; }
+
+        .button-grid button:hover,
+        .full-width-btn:hover {
             transform: translateY(-1px);
+            filter: brightness(1.1);
         }
 
         .score-display {
             text-align: center;
-            margin-top: 20px;
+            margin: 15px 0;
             padding: 15px;
             background: #333;
             border-radius: 10px;
@@ -245,13 +242,8 @@
             font-weight: bold;
         }
 
-        .player-score {
-            color: #4CAF50;
-        }
-
-        .ai-score {
-            color: #f44336;
-        }
+        .player-score { color: #4CAF50; }
+        .ai-score { color: #f44336; }
 
         .controls-info {
             margin-top: 15px;
@@ -262,22 +254,18 @@
             padding-top: 15px;
         }
 
-        /* Scrollbar styling */
         .config-panel::-webkit-scrollbar {
             width: 6px;
         }
-
         .config-panel::-webkit-scrollbar-track {
             background: #222;
             border-radius: 3px;
         }
-
         .config-panel::-webkit-scrollbar-thumb {
             background: #4CAF50;
             border-radius: 3px;
         }
 
-        /* Pause indicator */
         .pause-indicator {
             position: absolute;
             top: 50%;
@@ -295,36 +283,41 @@
             z-index: 25;
             border: 2px solid #4CAF50;
         }
-
-        .pause-indicator.visible {
-            opacity: 1;
-        }
+        .pause-indicator.visible { opacity: 1; }
     </style>
 </head>
 <body>
     <div class="game-container">
         <canvas id="pongCanvas"></canvas>
 
-        <!-- Settings Button (Cog Icon) -->
         <div class="settings-btn" id="settingsBtn" title="Settings">
             <svg viewBox="0 0 24 24">
                 <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
             </svg>
         </div>
 
-        <!-- Overlay for blurred background -->
         <div class="overlay" id="overlay"></div>
-
-        <!-- Pause indicator -->
         <div class="pause-indicator" id="pauseIndicator">GAME PAUSED</div>
 
-        <!-- Configuration Panel - Centered Modal -->
         <div class="config-panel" id="configPanel">
-            <h2>⚙️ Game Settings</h2>
+            <h2 id="settingsTitle">⚙️ Game Settings</h2>
+
+            <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="de">Deutsch</option>
+                <option value="zh-CN">简体中文</option>
+                <option value="zh-TW">繁體中文</option>
+            </select>
+
+            <select id="gameModeSelect">
+                <option value="single">Single Player</option>
+                <option value="two">Two Players</option>
+            </select>
             
             <div class="config-group">
                 <label>
-                    Ball Speed
+                    <span id="ballSpeedLabel">Ball Speed</span>
                     <span class="value-display" id="ballSpeedValue">5</span>
                 </label>
                 <input type="range" id="ballSpeed" min="3" max="10" step="0.5" value="5">
@@ -332,7 +325,7 @@
 
             <div class="config-group">
                 <label>
-                    Player Speed
+                    <span id="playerSpeedLabel">Player Speed</span>
                     <span class="value-display" id="playerSpeedValue">6</span>
                 </label>
                 <input type="range" id="playerSpeed" min="3" max="12" step="1" value="6">
@@ -340,7 +333,7 @@
 
             <div class="config-group">
                 <label>
-                    AI Speed
+                    <span id="aiSpeedLabel">AI Speed</span>
                     <span class="value-display" id="aiSpeedValue">4</span>
                 </label>
                 <input type="range" id="aiSpeed" min="2" max="10" step="0.5" value="4">
@@ -348,63 +341,329 @@
 
             <div class="config-group">
                 <label>
-                    Ball Acceleration
+                    <span id="ballAccelerationLabel">Ball Acceleration</span>
                     <span class="value-display" id="ballAccelerationValue">0.5</span>
                 </label>
                 <input type="range" id="ballAcceleration" min="0" max="2" step="0.1" value="0.5">
             </div>
 
             <div class="config-group">
-                <label>Background Color</label>
+                <label id="backgroundColorLabel">Background Color</label>
                 <input type="color" id="backgroundColor" value="#000000">
             </div>
 
             <div class="config-group">
-                <label>Paddle Color</label>
+                <label id="paddleColorLabel">Paddle Color</label>
                 <input type="color" id="paddleColor" value="#ffffff">
             </div>
 
             <div class="config-group">
-                <label>Ball Color</label>
+                <label id="ballColorLabel">Ball Color</label>
                 <input type="color" id="ballColor" value="#ffffff">
             </div>
 
             <div class="config-group">
                 <label>
-                    Paddle Height
+                    <span id="paddleSizeLabel">Paddle Height</span>
                     <span class="value-display" id="paddleSizeValue">80</span>
                 </label>
                 <input type="range" id="paddleSize" min="40" max="150" step="5" value="80">
             </div>
 
+            <div class="config-group">
+                <label>
+                    <span id="fieldWidthLabel">Field Width</span>
+                    <span class="value-display" id="fieldWidthValue">800</span>
+                </label>
+                <input type="range" id="fieldWidth" min="400" max="1200" step="50" value="800">
+            </div>
+
+            <div class="config-group">
+                <label>
+                    <span id="fieldHeightLabel">Field Height</span>
+                    <span class="value-display" id="fieldHeightValue">400</span>
+                </label>
+                <input type="range" id="fieldHeight" min="200" max="800" step="50" value="400">
+            </div>
+
             <div class="score-display">
-                <h3>Current Score</h3>
+                <h3 id="scoreTitle">Current Score</h3>
                 <div class="scores">
-                    <span class="player-score">You: <span id="playerScoreDisplay">0</span></span>
-                    <span class="ai-score">AI: <span id="aiScoreDisplay">0</span></span>
+                    <span class="player-score"><span id="youLabel">You</span>: <span id="playerScoreDisplay">0</span></span>
+                    <span class="ai-score"><span id="aiLabel">AI</span>: <span id="aiScoreDisplay">0</span></span>
                 </div>
             </div>
 
-            <div class="button-group">
-                <button class="reset-btn" onclick="resetGame()">Reset</button>
+            <div class="button-grid">
+                <button class="save-btn" id="saveBtn">Save Game</button>
+                <button class="load-btn" id="loadBtn">Load Game</button>
+                <button class="clear-btn full-width-btn" id="clearBtn" style="grid-column: span 2;">Clear Game</button>
+                <button class="reset-btn" id="resetBtn">Reset</button>
                 <button class="resume-btn" id="resumeBtn">Resume</button>
             </div>
 
-            <div class="controls-info">
+            <div class="controls-info" id="controlsInfo">
                 Controls: W/S or ↑/↓ to move paddle
             </div>
         </div>
+
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
     </div>
 
     <script>
+        // === MULTI-LANGUAGE SUPPORT ===
+        const translations = {
+            en: {
+                settingsTitle: "⚙️ Game Settings",
+                ballSpeed: "Ball Speed",
+                playerSpeed: "Player Speed",
+                aiSpeed: "AI Speed",
+                ballAcceleration: "Ball Acceleration",
+                backgroundColor: "Background Color",
+                paddleColor: "Paddle Color",
+                ballColor: "Ball Color",
+                paddleSize: "Paddle Height",
+                fieldWidth: "Field Width",
+                fieldHeight: "Field Height",
+                gameModeLabel: "Game Mode",
+                singlePlayer: "Single Player",
+                twoPlayers: "Two Players",
+                scoreTitle: "Current Score",
+                you: "You",
+                ai: "AI",
+                save: "Save Game",
+                load: "Load Game",
+                clear: "Clear Game",
+                reset: "Reset",
+                resume: "Resume",
+                pause: "GAME PAUSED",
+                controls: "Controls: W/S or ↑/↓ to move paddle"
+            },
+            es: {
+                settingsTitle: "⚙️ Configuración del juego",
+                ballSpeed: "Velocidad de la pelota",
+                playerSpeed: "Velocidad del jugador",
+                aiSpeed: "Velocidad de la IA",
+                ballAcceleration: "Aceleración de la pelota",
+                backgroundColor: "Color de fondo",
+                paddleColor: "Color de la paleta",
+                ballColor: "Color de la pelota",
+                paddleSize: "Altura de la paleta",
+                fieldWidth: "Ancho del campo",
+                fieldHeight: "Alto del campo",
+                gameModeLabel: "Modo de juego",
+                singlePlayer: "Un jugador",
+                twoPlayers: "Dos jugadores",
+                scoreTitle: "Puntuación actual",
+                you: "Tú",
+                ai: "IA",
+                save: "Guardar juego",
+                load: "Cargar juego",
+                clear: "Limpiar juego",
+                reset: "Reiniciar",
+                resume: "Reanudar",
+                pause: "JUEGO PAUSADO",
+                controls: "Controles: W/S o ↑/↓ para mover"
+            },
+            de: {
+                settingsTitle: "⚙️ Spieleinstellungen",
+                ballSpeed: "Ballgeschwindigkeit",
+                playerSpeed: "Spielergeschwindigkeit",
+                aiSpeed: "KI-Geschwindigkeit",
+                ballAcceleration: "Ballbeschleunigung",
+                backgroundColor: "Hintergrundfarbe",
+                paddleColor: "Schlägerfarbe",
+                ballColor: "Ballfarbe",
+                paddleSize: "Schlägerhöhe",
+                fieldWidth: "Spielfeldbreite",
+                fieldHeight: "Spielfeldhöhe",
+                gameModeLabel: "Spielmodus",
+                singlePlayer: "Einzelspieler",
+                twoPlayers: "Zwei Spieler",
+                scoreTitle: "Aktueller Spielstand",
+                you: "Du",
+                ai: "KI",
+                save: "Spiel speichern",
+                load: "Spiel laden",
+                clear: "Spiel löschen",
+                reset: "Zurücksetzen",
+                resume: "Fortsetzen",
+                pause: "SPIEL PAUSIERT",
+                controls: "Steuerung: W/S oder ↑/↓ zum Bewegen"
+            },
+            "zh-CN": {
+                settingsTitle: "⚙️ 游戏设置",
+                ballSpeed: "球速",
+                playerSpeed: "玩家速度",
+                aiSpeed: "AI速度",
+                ballAcceleration: "球加速度",
+                backgroundColor: "背景颜色",
+                paddleColor: "球拍颜色",
+                ballColor: "球颜色",
+                paddleSize: "球拍高度",
+                fieldWidth: "场地宽度",
+                fieldHeight: "场地高度",
+                gameModeLabel: "游戏模式",
+                singlePlayer: "单人模式",
+                twoPlayers: "双人模式",
+                scoreTitle: "当前分数",
+                you: "你",
+                ai: "AI",
+                save: "保存游戏",
+                load: "加载游戏",
+                clear: "清除游戏",
+                reset: "重置",
+                resume: "继续",
+                pause: "游戏暂停",
+                controls: "控制：W/S 或 ↑/↓ 移动球拍"
+            },
+            "zh-TW": {
+                settingsTitle: "⚙️ 遊戲設定",
+                ballSpeed: "球速",
+                playerSpeed: "玩家速度",
+                aiSpeed: "AI速度",
+                ballAcceleration: "球加速度",
+                backgroundColor: "背景顏色",
+                paddleColor: "球拍顏色",
+                ballColor: "球顏色",
+                paddleSize: "球拍高度",
+                fieldWidth: "場地寬度",
+                fieldHeight: "場地高度",
+                gameModeLabel: "遊戲模式",
+                singlePlayer: "單人模式",
+                twoPlayers: "雙人模式",
+                scoreTitle: "目前分數",
+                you: "你",
+                ai: "AI",
+                save: "儲存遊戲",
+                load: "載入遊戲",
+                clear: "清除遊戲",
+                reset: "重設",
+                resume: "繼續",
+                pause: "遊戲暫停",
+                controls: "控制：W/S 或 ↑/↓ 移動球拍"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function updateLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            document.getElementById('settingsTitle').textContent = t.settingsTitle;
+            document.getElementById('ballSpeedLabel').textContent = t.ballSpeed;
+            document.getElementById('playerSpeedLabel').textContent = t.playerSpeed;
+            document.getElementById('aiSpeedLabel').textContent = t.aiSpeed;
+            document.getElementById('ballAccelerationLabel').textContent = t.ballAcceleration;
+            document.getElementById('backgroundColorLabel').textContent = t.backgroundColor;
+            document.getElementById('paddleColorLabel').textContent = t.paddleColor;
+            document.getElementById('ballColorLabel').textContent = t.ballColor;
+            document.getElementById('paddleSizeLabel').textContent = t.paddleSize;
+            document.getElementById('fieldWidthLabel').textContent = t.fieldWidth;
+            document.getElementById('fieldHeightLabel').textContent = t.fieldHeight;
+            
+            // Update game mode select options
+            const modeSelect = document.getElementById('gameModeSelect');
+            modeSelect.options[0].text = t.singlePlayer;
+            modeSelect.options[1].text = t.twoPlayers;
+            
+            document.getElementById('scoreTitle').textContent = t.scoreTitle;
+            document.getElementById('youLabel').textContent = t.you;
+            document.getElementById('aiLabel').textContent = t.ai;
+            document.getElementById('saveBtn').textContent = t.save;
+            document.getElementById('loadBtn').textContent = t.load;
+            document.getElementById('clearBtn').textContent = t.clear;
+            document.getElementById('resetBtn').textContent = t.reset;
+            document.getElementById('resumeBtn').textContent = t.resume;
+            document.getElementById('pauseIndicator').textContent = t.pause;
+            document.getElementById('controlsInfo').textContent = t.controls;
+        }
+
+        // Detect default language
+        function detectUserLanguage() {
+            const lang = navigator.language || navigator.userLanguage || 'en';
+            const shortLang = lang.split('-')[0];
+            const supported = ['en', 'es', 'de', 'zh-CN', 'zh-TW'];
+            // Check exact match first
+            if (supported.includes(lang)) return lang;
+            // Check zh region variants
+            if (lang.startsWith('zh')) {
+                return lang.includes('TW') || lang.includes('HK') ? 'zh-TW' : 'zh-CN';
+            }
+            // Check short code
+            if (shortLang === 'es') return 'es';
+            if (shortLang === 'de') return 'de';
+            return 'en';
+        }
+
+        document.getElementById('languageSelect').addEventListener('change', (e) => {
+            updateLanguage(e.target.value);
+        });
+
+        // === GAME CODE ===
         const canvas = document.getElementById('pongCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Set canvas size
-        canvas.width = 800;
-        canvas.height = 400;
+        // Initial config with canvas size and game mode
+        const config = {
+            ballSpeed: 5,
+            playerSpeed: 6,
+            aiSpeed: 4,
+            ballAcceleration: 0.5,
+            backgroundColor: '#000000',
+            paddleColor: '#ffffff',
+            ballColor: '#ffffff',
+            paddleHeight: 80,
+            canvasWidth: 800,
+            canvasHeight: 400,
+            gameMode: 'single' // 'single' or 'two'
+        };
 
-        // Panel functionality
+        canvas.width = config.canvasWidth;
+        canvas.height = config.canvasHeight;
+
+        const paddleWidth = 10;
+        const ballSize = 10;
+
+        // Paddles
+        const player = {
+            x: 20,
+            y: canvas.height / 2 - config.paddleHeight / 2,
+            width: paddleWidth,
+            height: config.paddleHeight,
+            score: 0,
+            dy: 0
+        };
+
+        const ai = {
+            x: canvas.width - 20 - paddleWidth,
+            y: canvas.height / 2 - config.paddleHeight / 2,
+            width: paddleWidth,
+            height: config.paddleHeight,
+            score: 0,
+            dy: 0
+        };
+
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            size: ballSize,
+            dx: config.ballSpeed,
+            dy: config.ballSpeed * 0.6,
+            speed: config.ballSpeed
+        };
+
+        // Keyboard controls
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (['w','W','s','S','ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault();
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Panel elements
         const settingsBtn = document.getElementById('settingsBtn');
         const configPanel = document.getElementById('configPanel');
         const overlay = document.getElementById('overlay');
@@ -429,129 +688,131 @@
         }
 
         settingsBtn.addEventListener('click', () => {
-            if (isPaused) {
-                closePanel();
-            } else {
-                openPanel();
-            }
+            if (isPaused) closePanel();
+            else openPanel();
         });
-
         resumeBtn.addEventListener('click', closePanel);
-
-        // Close panel when clicking overlay
         overlay.addEventListener('click', closePanel);
-
-        // Close panel with Escape key
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && isPaused) {
-                closePanel();
+            if (e.key === 'Escape' && isPaused) closePanel();
+        });
+
+        // LocalStorage
+        function saveScores() {
+            localStorage.setItem('pongScores', JSON.stringify({
+                player: player.score,
+                ai: ai.score
+            }));
+        }
+        function loadScores() {
+            const saved = localStorage.getItem('pongScores');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    player.score = data.player || 0;
+                    ai.score = data.ai || 0;
+                } catch(e) {}
             }
-        });
+            updateScoreDisplay();
+        }
 
-        // Game configuration
-        const config = {
-            ballSpeed: 5,
-            playerSpeed: 6,
-            aiSpeed: 4,
-            ballAcceleration: 0.5,
-            backgroundColor: '#000000',
-            paddleColor: '#ffffff',
-            ballColor: '#ffffff',
-            paddleHeight: 80
-        };
+        function updateScoreDisplay() {
+            document.getElementById('playerScoreDisplay').textContent = player.score;
+            document.getElementById('aiScoreDisplay').textContent = ai.score;
+            saveScores();
+        }
 
-        // Game objects
-        const paddleWidth = 10;
-        const ballSize = 10;
+        // Apply new canvas dimensions
+        function applyCanvasSize(w, h) {
+            canvas.width = w;
+            canvas.height = h;
+            // Reposition paddles
+            player.x = 20;
+            ai.x = canvas.width - 20 - paddleWidth;
+            // Clamp paddle Y
+            if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+            if (ai.y + ai.height > canvas.height) ai.y = canvas.height - ai.height;
+            // Reset ball to center
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.speed = config.ballSpeed;
+            ball.dx = (Math.random() > 0.5 ? 1 : -1) * ball.speed;
+            ball.dy = (Math.random() * 1.2 - 0.6) * ball.speed;
+        }
 
-        // Player paddle (left)
-        const player = {
-            x: 20,
-            y: canvas.height / 2 - config.paddleHeight / 2,
-            width: paddleWidth,
-            height: config.paddleHeight,
-            score: 0,
-            dy: 0
-        };
+        // Sync UI from config (after load or init)
+        function syncUIFromConfig() {
+            document.getElementById('ballSpeed').value = config.ballSpeed;
+            document.getElementById('ballSpeedValue').textContent = config.ballSpeed;
+            document.getElementById('playerSpeed').value = config.playerSpeed;
+            document.getElementById('playerSpeedValue').textContent = config.playerSpeed;
+            document.getElementById('aiSpeed').value = config.aiSpeed;
+            document.getElementById('aiSpeedValue').textContent = config.aiSpeed;
+            document.getElementById('ballAcceleration').value = config.ballAcceleration;
+            document.getElementById('ballAccelerationValue').textContent = config.ballAcceleration;
+            document.getElementById('backgroundColor').value = config.backgroundColor;
+            document.getElementById('paddleColor').value = config.paddleColor;
+            document.getElementById('ballColor').value = config.ballColor;
+            document.getElementById('paddleSize').value = config.paddleHeight;
+            document.getElementById('paddleSizeValue').textContent = config.paddleHeight;
+            document.getElementById('fieldWidth').value = config.canvasWidth;
+            document.getElementById('fieldWidthValue').textContent = config.canvasWidth;
+            document.getElementById('fieldHeight').value = config.canvasHeight;
+            document.getElementById('fieldHeightValue').textContent = config.canvasHeight;
+            document.getElementById('gameModeSelect').value = config.gameMode;
+            player.height = config.paddleHeight;
+            ai.height = config.paddleHeight;
+            applyCanvasSize(config.canvasWidth, config.canvasHeight);
+        }
 
-        // AI paddle (right)
-        const ai = {
-            x: canvas.width - 20 - paddleWidth,
-            y: canvas.height / 2 - config.paddleHeight / 2,
-            width: paddleWidth,
-            height: config.paddleHeight,
-            score: 0,
-            dy: 0
-        };
-
-        // Ball
-        const ball = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            size: ballSize,
-            dx: config.ballSpeed,
-            dy: config.ballSpeed * 0.6,
-            speed: config.ballSpeed
-        };
-
-        // Keyboard controls
-        const keys = {};
-        window.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
-            // Prevent default scrolling
-            if (e.key === 'w' || e.key === 'W' || 
-                e.key === 's' || e.key === 'S' || 
-                e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                e.preventDefault();
-            }
-        });
-        window.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
-        });
-
-        // Configuration panel listeners
+        // Config listeners
         function setupConfigListeners() {
             document.getElementById('ballSpeed').addEventListener('input', (e) => {
                 config.ballSpeed = parseFloat(e.target.value);
                 document.getElementById('ballSpeedValue').textContent = config.ballSpeed;
             });
-
             document.getElementById('playerSpeed').addEventListener('input', (e) => {
                 config.playerSpeed = parseInt(e.target.value);
                 document.getElementById('playerSpeedValue').textContent = config.playerSpeed;
             });
-
             document.getElementById('aiSpeed').addEventListener('input', (e) => {
                 config.aiSpeed = parseFloat(e.target.value);
                 document.getElementById('aiSpeedValue').textContent = config.aiSpeed;
             });
-
             document.getElementById('ballAcceleration').addEventListener('input', (e) => {
                 config.ballAcceleration = parseFloat(e.target.value);
                 document.getElementById('ballAccelerationValue').textContent = config.ballAcceleration;
             });
-
             document.getElementById('backgroundColor').addEventListener('input', (e) => {
                 config.backgroundColor = e.target.value;
             });
-
             document.getElementById('paddleColor').addEventListener('input', (e) => {
                 config.paddleColor = e.target.value;
             });
-
             document.getElementById('ballColor').addEventListener('input', (e) => {
                 config.ballColor = e.target.value;
             });
-
             document.getElementById('paddleSize').addEventListener('input', (e) => {
                 config.paddleHeight = parseInt(e.target.value);
                 document.getElementById('paddleSizeValue').textContent = config.paddleHeight;
                 player.height = config.paddleHeight;
                 ai.height = config.paddleHeight;
             });
+            document.getElementById('fieldWidth').addEventListener('input', (e) => {
+                config.canvasWidth = parseInt(e.target.value);
+                document.getElementById('fieldWidthValue').textContent = config.canvasWidth;
+                applyCanvasSize(config.canvasWidth, config.canvasHeight);
+            });
+            document.getElementById('fieldHeight').addEventListener('input', (e) => {
+                config.canvasHeight = parseInt(e.target.value);
+                document.getElementById('fieldHeightValue').textContent = config.canvasHeight;
+                applyCanvasSize(config.canvasWidth, config.canvasHeight);
+            });
+            document.getElementById('gameModeSelect').addEventListener('change', (e) => {
+                config.gameMode = e.target.value;
+            });
         }
 
-        // Reset ball
         function resetBall() {
             ball.x = canvas.width / 2;
             ball.y = canvas.height / 2;
@@ -560,7 +821,6 @@
             ball.dy = (Math.random() * 1.2 - 0.6) * ball.speed;
         }
 
-        // Reset entire game
         function resetGame() {
             player.score = 0;
             ai.score = 0;
@@ -568,171 +828,226 @@
             updateScoreDisplay();
         }
 
-        // Update score display
-        function updateScoreDisplay() {
-            document.getElementById('playerScoreDisplay').textContent = player.score;
-            document.getElementById('aiScoreDisplay').textContent = ai.score;
+        function clearGame() {
+            resetGame();
         }
 
-        // Player movement
+        // Save/Load JSON
+        function saveGameToFile() {
+            const gameState = {
+                config: { ...config }, // deep copy
+                player: {
+                    score: player.score,
+                    y: player.y
+                },
+                ai: {
+                    score: ai.score,
+                    y: ai.y
+                },
+                ball: {
+                    x: ball.x,
+                    y: ball.y,
+                    dx: ball.dx,
+                    dy: ball.dy,
+                    speed: ball.speed
+                }
+            };
+            const blob = new Blob([JSON.stringify(gameState, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pong_save.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function loadGameFromFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const state = JSON.parse(e.target.result);
+                    // Restore config
+                    Object.assign(config, state.config);
+                    syncUIFromConfig();
+                    // Restore scores
+                    player.score = state.player.score;
+                    ai.score = state.ai.score;
+                    updateScoreDisplay();
+                    // Restore positions
+                    player.y = state.player.y;
+                    ai.y = state.ai.y;
+                    ball.x = state.ball.x;
+                    ball.y = state.ball.y;
+                    ball.dx = state.ball.dx;
+                    ball.dy = state.ball.dy;
+                    ball.speed = state.ball.speed;
+                } catch(err) {
+                    alert('Invalid save file.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+        document.getElementById('clearBtn').addEventListener('click', clearGame);
+        document.getElementById('saveBtn').addEventListener('click', saveGameToFile);
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                loadGameFromFile(e.target.files[0]);
+                e.target.value = '';
+            }
+        });
+
+        // Movement logic depending on game mode
         function movePlayer() {
-            if (keys['w'] || keys['W'] || keys['ArrowUp']) {
-                player.dy = -config.playerSpeed;
-            } else if (keys['s'] || keys['S'] || keys['ArrowDown']) {
-                player.dy = config.playerSpeed;
+            if (config.gameMode === 'single') {
+                // Single player: left paddle responds to both W/S and Arrow keys
+                if (keys['w'] || keys['W'] || keys['ArrowUp']) {
+                    player.dy = -config.playerSpeed;
+                } else if (keys['s'] || keys['S'] || keys['ArrowDown']) {
+                    player.dy = config.playerSpeed;
+                } else {
+                    player.dy = 0;
+                }
             } else {
-                player.dy = 0;
+                // Two player: left paddle uses W/S only
+                if (keys['w'] || keys['W']) {
+                    player.dy = -config.playerSpeed;
+                } else if (keys['s'] || keys['S']) {
+                    player.dy = config.playerSpeed;
+                } else {
+                    player.dy = 0;
+                }
             }
-
             player.y += player.dy;
-
-            // Keep player paddle on screen
-            if (player.y < 0) {
-                player.y = 0;
-            } else if (player.y + player.height > canvas.height) {
-                player.y = canvas.height - player.height;
-            }
+            if (player.y < 0) player.y = 0;
+            if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
         }
 
-        // AI movement
-        function moveAI() {
-            const aiCenter = ai.y + ai.height / 2;
-            const ballCenter = ball.y + ball.size / 2;
-            
-            if (aiCenter < ballCenter - 20) {
-                ai.dy = config.aiSpeed;
-            } else if (aiCenter > ballCenter + 20) {
-                ai.dy = -config.aiSpeed;
+        function moveRightPaddle() {
+            if (config.gameMode === 'single') {
+                // AI control
+                const aiCenter = ai.y + ai.height / 2;
+                const ballCenter = ball.y + ball.size / 2;
+                if (aiCenter < ballCenter - 20) ai.dy = config.aiSpeed;
+                else if (aiCenter > ballCenter + 20) ai.dy = -config.aiSpeed;
+                else ai.dy = 0;
             } else {
-                ai.dy = 0;
+                // Two player: right paddle uses Arrow keys
+                if (keys['ArrowUp']) {
+                    ai.dy = -config.playerSpeed;
+                } else if (keys['ArrowDown']) {
+                    ai.dy = config.playerSpeed;
+                } else {
+                    ai.dy = 0;
+                }
             }
-
             ai.y += ai.dy;
-
-            // Keep AI paddle on screen
-            if (ai.y < 0) {
-                ai.y = 0;
-            } else if (ai.y + ai.height > canvas.height) {
-                ai.y = canvas.height - ai.height;
-            }
+            if (ai.y < 0) ai.y = 0;
+            if (ai.y + ai.height > canvas.height) ai.y = canvas.height - ai.height;
         }
 
-        // Ball movement and collision
         function moveBall() {
             ball.x += ball.dx;
             ball.y += ball.dy;
-
-            // Ball collision with top and bottom walls
             if (ball.y <= 0 || ball.y + ball.size >= canvas.height) {
                 ball.dy *= -1;
             }
-
-            // Ball collision with player paddle
-            if (
-                ball.x <= player.x + player.width &&
+            // Player collision
+            if (ball.x <= player.x + player.width &&
                 ball.y + ball.size >= player.y &&
                 ball.y <= player.y + player.height &&
-                ball.dx < 0
-            ) {
-                // Calculate where on the paddle the ball hit (for angle variation)
-                const hitPosition = (ball.y + ball.size/2 - player.y) / player.height;
-                const angle = (hitPosition - 0.5) * Math.PI/2; // Angle between -45 and 45 degrees
-                
+                ball.dx < 0) {
+                const hit = (ball.y + ball.size/2 - player.y) / player.height;
+                const angle = (hit - 0.5) * Math.PI/2;
                 ball.dx = Math.cos(angle) * (ball.speed + config.ballAcceleration);
                 ball.dy = Math.sin(angle) * (ball.speed + config.ballAcceleration);
-                ball.dx = Math.abs(ball.dx); // Ensure ball goes to the right
+                ball.dx = Math.abs(ball.dx);
                 ball.speed += config.ballAcceleration;
             }
-
-            // Ball collision with AI paddle
-            if (
-                ball.x + ball.size >= ai.x &&
+            // Right paddle collision
+            if (ball.x + ball.size >= ai.x &&
                 ball.y + ball.size >= ai.y &&
                 ball.y <= ai.y + ai.height &&
-                ball.dx > 0
-            ) {
-                const hitPosition = (ball.y + ball.size/2 - ai.y) / ai.height;
-                const angle = (hitPosition - 0.5) * Math.PI/2;
-                
+                ball.dx > 0) {
+                const hit = (ball.y + ball.size/2 - ai.y) / ai.height;
+                const angle = (hit - 0.5) * Math.PI/2;
                 ball.dx = -Math.cos(angle) * (ball.speed + config.ballAcceleration);
                 ball.dy = Math.sin(angle) * (ball.speed + config.ballAcceleration);
-                ball.dx = -Math.abs(ball.dx); // Ensure ball goes to the left
+                ball.dx = -Math.abs(ball.dx);
                 ball.speed += config.ballAcceleration;
             }
-
-            // Score points
+            // Scoring
             if (ball.x + ball.size < 0) {
-                // AI scores
                 ai.score++;
                 updateScoreDisplay();
                 resetBall();
             } else if (ball.x > canvas.width) {
-                // Player scores
                 player.score++;
                 updateScoreDisplay();
                 resetBall();
             }
         }
 
-        // Draw everything
         function draw() {
-            // Clear canvas with configurable background color
             ctx.fillStyle = config.backgroundColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw center line
-            ctx.strokeStyle = '#ffffff33'; // Semi-transparent white
+            // Center line
+            ctx.strokeStyle = '#ffffff33';
             ctx.lineWidth = 2;
             ctx.setLineDash([10, 10]);
             ctx.beginPath();
-            ctx.moveTo(canvas.width / 2, 0);
-            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.moveTo(canvas.width/2, 0);
+            ctx.lineTo(canvas.width/2, canvas.height);
             ctx.stroke();
             ctx.setLineDash([]);
-
-            // Draw scores
+            // Scores
             ctx.font = '48px Arial';
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
-            ctx.fillText(player.score, canvas.width / 4, 60);
-            ctx.fillText(ai.score, 3 * canvas.width / 4, 60);
-
-            // Draw player paddle with configurable color
+            ctx.fillText(player.score, canvas.width/4, 60);
+            ctx.fillText(ai.score, 3*canvas.width/4, 60);
+            // Paddles
             ctx.fillStyle = config.paddleColor;
             ctx.fillRect(player.x, player.y, player.width, player.height);
-
-            // Draw AI paddle with configurable color
-            ctx.fillStyle = config.paddleColor;
             ctx.fillRect(ai.x, ai.y, ai.width, ai.height);
-
-            // Draw ball with configurable color
+            // Ball
             ctx.fillStyle = config.ballColor;
             ctx.beginPath();
-            ctx.arc(
-                ball.x + ball.size / 2,
-                ball.y + ball.size / 2,
-                ball.size / 2,
-                0,
-                Math.PI * 2
-            );
+            ctx.arc(ball.x + ball.size/2, ball.y + ball.size/2, ball.size/2, 0, Math.PI*2);
             ctx.fill();
         }
 
-        // Game loop
         function gameLoop() {
             if (!isPaused) {
                 movePlayer();
-                moveAI();
+                moveRightPaddle();
                 moveBall();
             }
             draw();
             requestAnimationFrame(gameLoop);
         }
 
-        // Initialize
-        setupConfigListeners();
-        resetBall();
-        gameLoop();
+        // Initialize everything
+        function init() {
+            // Set language
+            const userLang = detectUserLanguage();
+            document.getElementById('languageSelect').value = userLang;
+            updateLanguage(userLang);
+            // Setup config listeners
+            setupConfigListeners();
+            // Load stored scores
+            loadScores();
+            // Sync UI from default config
+            syncUIFromConfig();
+            // Start game loop
+            gameLoop();
+        }
+
+        init();
     </script>
 </body>
 </html>
