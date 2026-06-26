@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>zhujingqi · monedas ∞</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #fff;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+  }
+
+  /* ── Lang switcher — esquina superior derecha de la página ──────── */
+  .lang-switch {
+    position: fixed;
+    top: 16px;
+    right: 20px;
+    display: flex;
+    gap: 5px;
+    z-index: 100;
+  }
+  .lang-switch button {
+    height: 26px;
+    padding: 0 8px;
+    border: 1px solid #d4d4d4;
+    border-radius: 5px;
+    background: #fff;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    color: #888;
+    transition: all .12s;
+    white-space: nowrap;
+  }
+  .lang-switch button.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .lang-switch button:hover:not(.active) { color: #333; border-color: #aaa; }
+
+  .card {
+    width: 100%;
+    max-width: 440px;
+    padding: 36px 32px 28px;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    position: relative;
+  }
+  h1 { font-size: 20px; font-weight: 600; letter-spacing: -.3px; margin-bottom: 2px; }
+  .sub { font-size: 13px; color: #888; margin-bottom: 24px; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 4px;
+  }
+  input {
+    width: 100%;
+    height: 38px;
+    border: 1px solid #d4d4d4;
+    border-radius: 6px;
+    padding: 0 12px;
+    font-size: 14px;
+    font-family: inherit;
+    margin-bottom: 14px;
+    transition: border-color .15s;
+    outline: none;
+    background: #fafafa;
+  }
+  input:focus { border-color: #1a1a1a; background: #fff; }
+
+  /* ── Opciones avanzadas (collapsible) ──────────────────────────── */
+  .advanced-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #999;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 10px;
+    padding: 2px 0;
+    transition: color .15s;
+  }
+  .advanced-toggle:hover { color: #555; }
+  .advanced-toggle .arrow {
+    display: inline-block;
+    transition: transform .2s;
+    font-size: 10px;
+  }
+  .advanced-toggle.open .arrow { transform: rotate(90deg); }
+
+  .advanced-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height .25s ease, margin .25s ease;
+    margin-bottom: 0;
+  }
+  .advanced-body.open { max-height: 80px; margin-bottom: 4px; }
+
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .step-row label { margin-bottom: 0; flex-shrink: 0; }
+  .step-row input { margin-bottom: 0; flex: 1; }
+
+  button {
+    width: 100%;
+    height: 42px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-go {
+    background: #1a1a1a;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .btn-go:hover { background: #333; }
+  .btn-go:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-stop {
+    background: #fff;
+    color: #d93131;
+    border: 1px solid #d93131;
+    display: none;
+  }
+  .btn-stop:hover { background: #fef5f5; }
+
+  .log {
+    margin-top: 18px;
+    background: #f7f7f7;
+    border: 1px solid #eaeaea;
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #444;
+    max-height: 280px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    display: none;
+  }
+  .log.show { display: block; }
+  .log .ok   { color: #0a7e0a; }
+  .log .warn { color: #b85c00; }
+  .log .err  { color: #c00; }
+  .log .dim  { color: #999; }
+
+  .progress-wrap { margin-top: 14px; display: none; }
+  .progress-wrap.show { display: block; }
+  .progress-bar {
+    height: 6px;
+    background: #eaeaea;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #1a1a1a;
+    border-radius: 3px;
+    transition: width .3s;
+  }
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #888;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  Language switcher — fixed top-right of the page
+  ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="lang-switch">
+  <button data-lang="zh-CN" class="active">简</button>
+  <button data-lang="zh-TW">繁</button>
+  <button data-lang="en">EN</button>
+  <button data-lang="es">ES</button>
+  <button data-lang="de">DE</button>
+</div>
+
+<div class="card">
+  <h1>zhujingqi · monedas ∞</h1>
+  <p class="sub" data-i18n="subtitle">13 niveles (LV0 → MAX) · delta auto</p>
+
+  <label data-i18n="lbl_user">Usuario</label>
+  <input id="username" type="text" data-i18n-placeholder="ph_user" autocomplete="off" autocapitalize="none">
+
+  <label data-i18n="lbl_pass">Contraseña</label>
+  <input id="password" type="password" data-i18n-placeholder="ph_pass">
+
+  <label data-i18n="lbl_target">Meta</label>
+  <input id="target" type="number" value="999999" min="0">
+
+  <!-- ── Opciones avanzadas (plegable) ────────────────────────────── -->
+  <div class="advanced-toggle" id="advancedToggle" onclick="toggleAdvanced()">
+    <span class="arrow">▸</span>
+    <span data-i18n="lbl_advanced">Opciones Avanzadas</span>
+  </div>
+  <div class="advanced-body" id="advancedBody">
+    <div class="step-row">
+      <label data-i18n="lbl_step">Paso (±500)</label>
+      <input id="step" type="number" value="500" min="1" max="500">
+    </div>
+  </div>
+
+  <button class="btn-go" id="btnGo" onclick="go()" data-i18n="btn_go">▶  Inyectar monedas</button>
+  <button class="btn-stop" id="btnStop" onclick="stop()" data-i18n="btn_stop">■  Parar</button>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text">
+      <span id="progressStatus">0 / 0</span>
+      <span id="progressSpeed">—</span>
+    </div>
+  </div>
+
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  Supabase
+// ═══════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = "https://hxlhrrllhvvazyhiuhvb.supabase.co/rest/v1";
+const SUPABASE_KEY = "sb_publishable_uM0aEPvk4q_hRI5VzXN3Yg_IQsCdOCY";
+const HEADERS = {
+  "apikey": SUPABASE_KEY,
+  "Authorization": "Bearer " + SUPABASE_KEY,
+  "Content-Type": "application/json",
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Levels (LV0 → MAX)
+// ═══════════════════════════════════════════════════════════════════════════
+const LEVELS = [
+  [    0, "LV0",  "⚫"], [    1, "LV1",  "🟢"], [   21, "LV2",  "🔵"],
+  [   41, "LV3",  "⭐"], [   81, "LV4",  "🟡"], [  161, "LV5",  "🟠"],
+  [  321, "LV6",  "🔴"], [  641, "LV7",  "💖"], [ 1281, "LV8",  "💜"],
+  [ 2561, "LV9",  "👑"], [ 5121, "LV10", "👑"], [10241, "LV11", "🔥"],
+  [20481, "MAX",  "💀"],
+];
+
+function getLevel(c) {
+  for (let i = LEVELS.length - 1; i >= 0; i--)
+    if (c >= LEVELS[i][0]) return LEVELS[i][1] + " " + LEVELS[i][2];
+  return "LV0 ⚫";
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  i18n — 5 languages
+// ═══════════════════════════════════════════════════════════════════════════
+const I18N = {
+  "zh-CN": {
+    subtitle: "13 个等级 (LV0 → MAX) · 步长自动",
+    lbl_user: "用户名",
+    lbl_pass: "密码",
+    lbl_target: "目标",
+    lbl_step: "步长 (±500)",
+    lbl_advanced: "高级选项",
+    ph_user: "输入用户名",
+    ph_pass: "输入密码",
+    btn_go: "▶  注入金币",
+    btn_stop: "■  停止",
+
+    log_searching:    user => `正在查找 '${user}'…`,
+    log_not_found:    "用户不存在。",
+    log_bad_pass:     "密码错误。",
+    log_bad_auth:     "用户名和密码是必填项。",
+    log_login_ok:     (uid, coins, lvl) => `登录成功 · ID=${uid} · ${coins.toLocaleString()} 金币 · ${lvl}`,
+    log_already_met:  coins => `${coins.toLocaleString()} 金币 · 已达到目标。无需操作。`,
+    log_going_up:     (target, steps, step) => `目标: ${target.toLocaleString()} · ↑ 增加 · ${steps} × +${step}`,
+    log_going_down:   (target, steps, step) => `目标: ${target.toLocaleString()} · ↓ 减少 · ${steps} × -${step}`,
+    log_aborted:      "⏹  用户中止。",
+    log_done:         (elapsed, ok, fail) => `✓  ${elapsed.toFixed(1)}秒 · ${ok} 成功, ${fail} 失败`,
+    log_final:        (coins, lvl) => `${coins.toLocaleString()} 金币 → ${lvl}`,
+    log_level_change: (from, to) => `等级变化: ${from} → ${to}`,
+    log_refresh:      "刷新论坛页面即可看到变化！",
+    log_error:        msg => `错误: ${msg}`,
+  },
+  "zh-TW": {
+    subtitle: "13 個等級 (LV0 → MAX) · 步長自動",
+    lbl_user: "使用者名稱",
+    lbl_pass: "密碼",
+    lbl_target: "目標",
+    lbl_step: "步長 (±500)",
+    lbl_advanced: "進階選項",
+    ph_user: "輸入使用者名稱",
+    ph_pass: "輸入密碼",
+    btn_go: "▶  注入金幣",
+    btn_stop: "■  停止",
+
+    log_searching:    user => `正在尋找 '${user}'…`,
+    log_not_found:    "使用者不存在。",
+    log_bad_pass:     "密碼錯誤。",
+    log_bad_auth:     "使用者名稱和密碼為必填項。",
+    log_login_ok:     (uid, coins, lvl) => `登入成功 · ID=${uid} · ${coins.toLocaleString()} 金幣 · ${lvl}`,
+    log_already_met:  coins => `${coins.toLocaleString()} 金幣 · 已達到目標。無需操作。`,
+    log_going_up:     (target, steps, step) => `目標: ${target.toLocaleString()} · ↑ 增加 · ${steps} × +${step}`,
+    log_going_down:   (target, steps, step) => `目標: ${target.toLocaleString()} · ↓ 減少 · ${steps} × -${step}`,
+    log_aborted:      "⏹  使用者中止。",
+    log_done:         (elapsed, ok, fail) => `✓  ${elapsed.toFixed(1)}秒 · ${ok} 成功, ${fail} 失敗`,
+    log_final:        (coins, lvl) => `${coins.toLocaleString()} 金幣 → ${lvl}`,
+    log_level_change: (from, to) => `等級變化: ${from} → ${to}`,
+    log_refresh:      "重新整理論壇頁面即可看到變化！",
+    log_error:        msg => `錯誤: ${msg}`,
+  },
+  en: {
+    subtitle: "13 levels (LV0 → MAX) · auto-step",
+    lbl_user: "Username",
+    lbl_pass: "Password",
+    lbl_target: "Target",
+    lbl_step: "Step (±500)",
+    lbl_advanced: "Advanced Options",
+    ph_user: "your_username",
+    ph_pass: "your password",
+    btn_go: "▶  Inject coins",
+    btn_stop: "■  Stop",
+
+    log_searching:    user => `Looking up '${user}'…`,
+    log_not_found:    "User not found.",
+    log_bad_pass:     "Wrong password.",
+    log_bad_auth:     "Username and password are required.",
+    log_login_ok:     (uid, coins, lvl) => `Login OK · ID=${uid} · ${coins.toLocaleString()} coins · ${lvl}`,
+    log_already_met:  coins => `${coins.toLocaleString()} coins · Already at target. Nothing to do.`,
+    log_going_up:     (target, steps, step) => `Target: ${target.toLocaleString()} · ↑ increasing · ${steps} × +${step}`,
+    log_going_down:   (target, steps, step) => `Target: ${target.toLocaleString()} · ↓ decreasing · ${steps} × -${step}`,
+    log_aborted:      "⏹  Aborted by user.",
+    log_done:         (elapsed, ok, fail) => `✓  ${elapsed.toFixed(1)}s · ${ok} OK, ${fail} failed`,
+    log_final:        (coins, lvl) => `${coins.toLocaleString()} coins → ${lvl}`,
+    log_level_change: (from, to) => `Level change: ${from} → ${to}`,
+    log_refresh:      "Refresh the forum to see the changes!",
+    log_error:        msg => `Error: ${msg}`,
+  },
+  es: {
+    subtitle: "13 niveles (LV0 → MAX) · paso automático",
+    lbl_user: "Usuario",
+    lbl_pass: "Contraseña",
+    lbl_target: "Meta",
+    lbl_step: "Paso (±500)",
+    lbl_advanced: "Opciones Avanzadas",
+    ph_user: "tu_usuario",
+    ph_pass: "tu contraseña",
+    btn_go: "▶  Inyectar monedas",
+    btn_stop: "■  Parar",
+
+    log_searching:    user => `Buscando '${user}'…`,
+    log_not_found:    "Usuario no encontrado.",
+    log_bad_pass:     "Contraseña incorrecta.",
+    log_bad_auth:     "Usuario y contraseña son obligatorios.",
+    log_login_ok:     (uid, coins, lvl) => `Login OK · ID=${uid} · ${coins.toLocaleString()} monedas · ${lvl}`,
+    log_already_met:  coins => `${coins.toLocaleString()} monedas · Ya estás en la meta. Nada que hacer.`,
+    log_going_up:     (target, steps, step) => `Meta: ${target.toLocaleString()} · ↑ subiendo · ${steps} × +${step}`,
+    log_going_down:   (target, steps, step) => `Meta: ${target.toLocaleString()} · ↓ bajando · ${steps} × -${step}`,
+    log_aborted:      "⏹  Abortado por el usuario.",
+    log_done:         (elapsed, ok, fail) => `✓  ${elapsed.toFixed(1)}s · ${ok} OK, ${fail} fallos`,
+    log_final:        (coins, lvl) => `${coins.toLocaleString()} monedas → ${lvl}`,
+    log_level_change: (from, to) => `Cambio de nivel: ${from} → ${to}`,
+    log_refresh:      "¡Refresca el foro para ver los cambios!",
+    log_error:        msg => `Error: ${msg}`,
+  },
+  de: {
+    subtitle: "13 Stufen (LV0 → MAX) · Schritt automatisch",
+    lbl_user: "Benutzername",
+    lbl_pass: "Passwort",
+    lbl_target: "Ziel",
+    lbl_step: "Schritt (±500)",
+    lbl_advanced: "Erweiterte Optionen",
+    ph_user: "dein_name",
+    ph_pass: "dein Passwort",
+    btn_go: "▶  Münzen senden",
+    btn_stop: "■  Stopp",
+
+    log_searching:    user => `Suche nach '${user}'…`,
+    log_not_found:    "Benutzer nicht gefunden.",
+    log_bad_pass:     "Falsches Passwort.",
+    log_bad_auth:     "Benutzername und Passwort sind erforderlich.",
+    log_login_ok:     (uid, coins, lvl) => `Login OK · ID=${uid} · ${coins.toLocaleString()} Münzen · ${lvl}`,
+    log_already_met:  coins => `${coins.toLocaleString()} Münzen · Bereits am Ziel. Nichts zu tun.`,
+    log_going_up:     (target, steps, step) => `Ziel: ${target.toLocaleString()} · ↑ erhöhen · ${steps} × +${step}`,
+    log_going_down:   (target, steps, step) => `Ziel: ${target.toLocaleString()} · ↓ verringern · ${steps} × -${step}`,
+    log_aborted:      "⏹  Vom Benutzer abgebrochen.",
+    log_done:         (elapsed, ok, fail) => `✓  ${elapsed.toFixed(1)}s · ${ok} OK, ${fail} fehlgeschlagen`,
+    log_final:        (coins, lvl) => `${coins.toLocaleString()} Münzen → ${lvl}`,
+    log_level_change: (from, to) => `Stufenwechsel: ${from} → ${to}`,
+    log_refresh:      "Forum neu laden, um die Änderungen zu sehen!",
+    log_error:        msg => `Fehler: ${msg}`,
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Language detection
+// ═══════════════════════════════════════════════════════════════════════════
+function detectLang() {
+  const nav = (navigator.language || "zh-CN").toLowerCase();
+  if (nav.startsWith("zh-tw") || nav.startsWith("zh-hk")) return "zh-TW";
+  if (nav.startsWith("zh")) return "zh-CN";
+  if (nav.startsWith("es")) return "es";
+  if (nav.startsWith("de")) return "de";
+  return "en";
+}
+
+let lang = detectLang();
+
+function applyLang(code) {
+  lang = code;
+  const t = I18N[code] || I18N["en"];
+
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (t[key]) el.placeholder = t[key];
+  });
+
+  document.querySelectorAll(".lang-switch button").forEach(b => {
+    b.classList.toggle("active", b.dataset.lang === code);
+  });
+
+  document.documentElement.lang = code;
+}
+
+document.querySelectorAll(".lang-switch button").forEach(btn => {
+  btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+});
+
+applyLang(lang);
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Advanced options toggle
+// ═══════════════════════════════════════════════════════════════════════════
+let advancedOpen = false;
+
+function toggleAdvanced() {
+  advancedOpen = !advancedOpen;
+  const tgl = document.getElementById("advancedToggle");
+  const body = document.getElementById("advancedBody");
+  tgl.classList.toggle("open", advancedOpen);
+  body.classList.toggle("open", advancedOpen);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  SHA-256
+// ═══════════════════════════════════════════════════════════════════════════
+async function sha256(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  UI
+// ═══════════════════════════════════════════════════════════════════════════
+const logEl = document.getElementById("log");
+let abort = false;
+
+function log(msg, cls = "") {
+  logEl.classList.add("show");
+  const time = new Date().toLocaleTimeString();
+  logEl.innerHTML += `<span class="${cls}">[${time}] ${msg}</span>\n`;
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function setRunning(run) {
+  document.getElementById("btnGo").disabled = run;
+  document.getElementById("btnStop").style.display = run ? "block" : "none";
+  document.getElementById("username").disabled = run;
+  document.getElementById("password").disabled = run;
+  document.getElementById("target").disabled = run;
+  document.getElementById("step").disabled = run;
+  document.querySelectorAll(".lang-switch button").forEach(b => b.disabled = run);
+  const tgl = document.getElementById("advancedToggle");
+  tgl.style.pointerEvents = run ? "none" : "auto";
+  tgl.style.opacity = run ? "0.4" : "1";
+}
+
+function updateProgress(i, total, coins, rps, elapsed) {
+  const wrap = document.getElementById("progressWrap");
+  wrap.classList.add("show");
+  document.getElementById("progressFill").style.width = total ? (i / total * 100).toFixed(1) + "%" : "100%";
+  document.getElementById("progressStatus").textContent = `${i} / ${total}  ·  ${coins.toLocaleString()} 🪙`;
+  document.getElementById("progressSpeed").textContent = `${rps.toFixed(0)} req/s · ${elapsed.toFixed(1)}s`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════════════════════════════════
+async function apiGet(path, params = {}) {
+  const qs = new URLSearchParams(params).toString();
+  const r = await fetch(`${SUPABASE_URL}/${path}?${qs}`, { headers: HEADERS });
+  if (!r.ok) throw new Error(`GET ${path}: ${r.status}`);
+  return r.json();
+}
+
+async function apiPatchCoins(uid, newVal) {
+  const r = await fetch(`${SUPABASE_URL}/users?id=eq.${uid}`, {
+    method: "PATCH",
+    headers: { ...HEADERS, "Prefer": "return=minimal" },
+    body: JSON.stringify({ coins: Math.max(0, newVal) }),
+  });
+  return r.ok;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Auto-step
+// ═══════════════════════════════════════════════════════════════════════════
+function computeStep(needed, manualStep) {
+  if (advancedOpen && manualStep && manualStep < 500) return manualStep;
+  if (needed <= 500) return needed;
+  return Math.min(manualStep || 500, 500);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Main
+// ═══════════════════════════════════════════════════════════════════════════
+async function go() {
+  logEl.innerHTML = "";
+  abort = false;
+  setRunning(true);
+
+  const t = I18N[lang];
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
+  const target   = parseInt(document.getElementById("target").value) || 999999;
+  const manualStep = parseInt(document.getElementById("step").value) || 500;
+
+  if (!username || !password) {
+    log(t.log_bad_auth, "err");
+    return setRunning(false);
+  }
+
+  try {
+    log(t.log_searching(username), "dim");
+    const users = await apiGet("users", { name: `eq.${username}` });
+
+    if (!users.length) { log(t.log_not_found, "err"); return setRunning(false); }
+
+    const user = users[0];
+    const uid  = user.id;
+    const hash = await sha256(password);
+
+    if (user.pass !== hash) { log(t.log_bad_pass, "err"); return setRunning(false); }
+
+    let coins = user.coins || 0;
+    const initialLevel = getLevel(coins);
+    log(t.log_login_ok(uid, coins, initialLevel), "ok");
+
+    if (coins === target) {
+      log(t.log_already_met(coins), "ok");
+      return setRunning(false);
+    }
+
+    const goingUp = coins < target;
+    const needed  = Math.abs(target - coins);
+    const STEP    = computeStep(needed, manualStep);
+    const delta   = goingUp ? STEP : -STEP;
+    const steps   = Math.ceil(needed / STEP);
+
+    if (goingUp) log(t.log_going_up(target, steps, STEP), "dim");
+    else         log(t.log_going_down(target, steps, STEP), "dim");
+
+    let ok = 0, fail = 0;
+    const t0 = performance.now();
+
+    for (let i = 0; i < steps; i++) {
+      if (abort) { log(t.log_aborted, "warn"); break; }
+
+      if (await apiPatchCoins(uid, coins + delta)) {
+        coins += delta;
+        ok++;
+      } else {
+        fail++;
+        try {
+          const u2 = await apiGet("users", { select: "coins", id: `eq.${uid}` });
+          if (u2.length) coins = u2[0].coins;
+        } catch (_) {}
+      }
+
+      if ((i + 1) % 10 === 0 || i === steps - 1) {
+        const elapsed = (performance.now() - t0) / 1000;
+        const rps = (i + 1) / (elapsed || 0.001);
+        updateProgress(i + 1, steps, coins, rps, elapsed);
+      }
+
+      await new Promise(r => setTimeout(r, 15));
+    }
+
+    const elapsed = (performance.now() - t0) / 1000;
+    const finalLevel = getLevel(coins);
+    log(t.log_done(elapsed, ok, fail), "ok");
+    log(t.log_final(coins, finalLevel), "ok");
+    if (initialLevel !== finalLevel) log(t.log_level_change(initialLevel, finalLevel), "dim");
+    log(t.log_refresh, "ok");
+
+  } catch (e) {
+    log(t.log_error(e.message), "err");
+  }
+
+  setRunning(false);
+}
+
+function stop() {
+  abort = true;
+  log(I18N[lang].log_aborted, "warn");
+}
+</script>
+
+</body>
+</html>
