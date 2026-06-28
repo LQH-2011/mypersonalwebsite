@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<!-- saved from url=(0482)https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-06-28/tpc_jXfhfWvDT7rn/admin-panel.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260628%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260628T070152Z&X-Amz-Expires=7200&X-Amz-Signature=76e9eec80e01bea373055079808be5e4634e3b51a94d43440ccaf69838f21d4b&X-Amz-SignedHeaders=host&x-id=GetObject -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Administradores — Jacky Forum</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #0f0f0f;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .container { width: 100%; max-width: 520px; }
+  h1 {
+    font-size: 1.3rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .subtitle { font-size: 0.8rem; color: #888; margin-bottom: 28px; }
+
+  .search-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .search-box input {
+    flex: 1;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box input:focus { border-color: #555; }
+  .search-box button {
+    background: #2a2a2a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px 18px;
+    color: #e0e0e0;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+  }
+  .search-box button:hover { background: #3a3a3a; }
+
+  .users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .user-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1a1a1a;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 12px 16px;
+    transition: border-color 0.15s;
+  }
+  .user-row:hover { border-color: #333; }
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .user-name { font-size: 0.9rem; font-weight: 500; }
+  .user-id { font-size: 0.7rem; color: #666; }
+
+  .role-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+  .badge {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .badge-admin { background: rgba(212, 175, 55, 0.15); color: #d4af37; }
+  .badge-other { background: rgba(100, 149, 237, 0.12); color: #6495ed; }
+
+  .toggle-btn {
+    background: none;
+    border: 1px solid;
+    border-radius: 7px;
+    padding: 7px 16px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .toggle-btn.make-admin {
+    border-color: rgba(212, 175, 55, 0.4);
+    color: #d4af37;
+  }
+  .toggle-btn.make-admin:hover { background: rgba(212, 175, 55, 0.1); }
+  .toggle-btn.remove-admin {
+    border-color: rgba(255, 80, 80, 0.4);
+    color: #ff5050;
+  }
+  .toggle-btn.remove-admin:hover { background: rgba(255, 80, 80, 0.1); }
+  .toggle-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 0.85rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+  .toast.success { border-color: #4caf50; color: #4caf50; }
+  .toast.error { border-color: #ff5050; color: #ff5050; }
+
+  .loading { text-align: center; color: #666; font-size: 0.85rem; padding: 20px; }
+  .empty { text-align: center; color: #555; font-size: 0.85rem; padding: 30px; }
+</style>
+<style type="text/css" id="ctre_styles">
+			#ctre_wnd {
+				position: fixed; bottom: 0; right: 10px; width: 360px; padding: 10px 20px;
+				box-sizing: content-box;
+				text-align: left; font-family: Helvetica, Arial, sans-serif;
+				background: #fff; box-shadow: 0px 0px 40px rgba(0,0,0,0.15);
+				z-index: 2147483647;
+				font-size: 12px; color: #666;
+			}
+			#ctre_wnd * {
+				line-height: 1.3; font-size: inherit; color: inherit;
+				font-weight: normal; font-style: normal; font-family: inherit;
+				cursor: default;
+			}
+			#ctre_wnd a, #ctre_wnd input[type=checkbox] { cursor: pointer; }
+
+			#ctre_wnd .ct_minimize, #ctre_wnd .ct_close {
+				display: block; cursor: pointer;
+				position: absolute; top: 0; right: 0; width: 32px; line-height: 32px;
+				font-size: 14px; text-align: center;
+				transition: color 0.3s, background 0.3s;
+			}
+			#ctre_wnd .ct_minimize { right: 32px; background: #fff; color: #0fb4d4; }
+			#ctre_wnd .ct_minimize:hover { background: #0fb4d4; color: #fff; }
+			#ctre_wnd .ct_minimize i {
+				display: inline-block; cursor: pointer;
+				transform: rotate(45deg); transition: transform 0.5s;
+			}
+			#ctre_wnd .ct_close { color: #f00; background: #fff0f0; }
+			#ctre_wnd .ct_close:hover { color: #fff; background: #f00; }
+			#ctre_wnd .key {
+				display: inline-block;
+				font-family: monospace;
+				background: #f7f7f7; color: #999;
+				padding: 0 2px; margin: 0 2px;
+				border: solid 1px #d5d5d5; border-radius: 3px;
+			}
+			#ctre_wnd .ct_logo { font-size: 15px; font-weight: bold; }
+			#ctre_wnd .ct_logo.small { display: none; }
+			#ctre_wnd .ct_logo svg {
+				fill: #666; vertical-align: -15%;
+				transform: rotate(-240deg); transition: transform 1s;
+			}
+			#ctre_wnd .ct_logo.anim svg { transform: rotate(0deg); }
+
+			#ctre_wnd .version { color: #bbb; }
+			#ctre_wnd .keys { font-size: 11px; overflow: hidden; margin-top: 4px; color: #bbb; }
+			#ctre_wnd .ct_settings { font-size: 11px; overflow: hidden; margin: 8px 0; color: #bbb; }
+			#ctre_wnd .ct_settings a { color: #999; }
+			#ctre_wnd .ct_settings a:hover { color: #666; }
+			#ctre_wnd .activationKeys { float: left; margin-left: -2px; }
+			#ctre_wnd .transposeKeys { float: right; }
+			#ctre_current_elm {
+				font-family: monospace; background: #f7f7f7; color: #d5d5d5; padding: 2px; margin: 10px 0;
+				max-height: 84px; overflow: hidden;
+			}
+			#ctre_current_elm .pathNode { color: #999; border-bottom: solid 2px rgba(0,0,0,0); }
+			#ctre_current_elm .pathNode.active { border-bottom: solid 2px #555; }
+
+			#ctre_elm_list { display: none; margin: 0 -20px; background: #f7f7f7; border: solid 12px #f7f7f7; border-width: 12px 0 12px 0; max-height: 90px; overflow: auto; }
+			#ctre_elm_list.hasContent { display: block; }
+			#ctre_elm_list table { border: 0; width: 100%; border-spacing: 0; }
+			#ctre_elm_list tr { border: 0; }
+			#ctre_elm_list tr.ct_heading td { color: #bbb; }
+			#ctre_elm_list td { padding: 0; border: 0; background: #f7f7f7; }
+			#ctre_elm_list tr:nth-child(even) td { background: #fcfcfc; }
+			#ctre_elm_list td:nth-child(1) { padding-left: 20px; }
+			#ctre_elm_list td:nth-child(2) { text-align: center; }
+			#ctre_elm_list td:nth-child(3) { padding-right: 20px; }
+			#ctre_elm_list tr:not(.ct_heading) td:nth-child(1) { font-family: monospace; font-size: 11px; }
+			#ctre_elm_list td input { display: inline; -webkit-appearance: checkbox; }
+			#ctre_elm_list td input:before, #ctre_elm_list td input:after { content: none; }
+			#ctre_elm_list .ct_edit_selector { font-family: sans-serif; float: right; opacity: 0; color: #0fb4d4; text-decoration: none; }
+			#ctre_elm_list .ct_edit_selector:hover { color: #000; }
+			#ctre_elm_list tr:hover .ct_edit_selector { opacity: 1; }
+			#ctre_elm_list a.ct_delete { color: #f00; padding: 4px; text-decoration: none; font-size: 14px; }
+			#ctre_elm_list a.ct_delete:hover { color: #fff; background: #f00; }
+
+			#ctre_wnd .ct_more { border-top: solid 1px #f7f7f7; margin: 0 -20px; padding-top: 12px; color: #bbb; font-size: 10px; text-align: center; }
+			#ctre_wnd .ct_more a { color: #0fb4d4; font-size: inherit; text-decoration: none; transition: color 0.5s; }
+			#ctre_wnd .ct_more a:hover { color: #000; }
+
+			#ctre_wnd.minimized { width: 80px; height: 12px; }
+			#ctre_wnd.minimized > * { display: none; }
+			#ctre_wnd.minimized .ct_minimize,
+			#ctre_wnd.minimized .ct_close { display: block; }
+			#ctre_wnd.minimized .ct_minimize i { display: inline-block; transform: rotate(-135deg); }
+			#ctre_wnd.minimized .ct_logo.small { display: block; margin: -4px 0 0 -10px; }
+			</style></head>
+<body>
+<div class="container">
+  <h1>Gestión de Administradores</h1>
+  <p class="subtitle">Jacky Forum — Activar / Desactivar admin</p>
+
+  <div class="search-box">
+    <input id="search" type="text" placeholder="Buscar usuario..." autofocus="">
+    <button onclick="searchUsers()">Buscar</button>
+    <button onclick="loadAll()" style="font-size:0.75rem;">Todos</button>
+  </div>
+
+  <div id="users" class="users-list">
+      <div class="user-row" id="row-12">
+        <div class="user-info">
+          <span class="user-name">Jesús</span>
+          <span class="user-id">ID 12</span>
+          <div class="role-badges"><span class="badge badge-admin">admin</span></div>
+        </div>
+        <button class="toggle-btn remove-admin" onclick="toggleAdmin(12, &#39;Jesús&#39;, false)">Quitar admin</button>
+      </div></div>
+
+  <div class="toast" id="toast">✅ "Jesús" ahora es admin</div>
+</div>
+
+<script>
+const BASE = "https://hxlhrrllhvvazyhiuhvb.supabase.co";
+const ANON_KEY = "sb_publishable_uM0aEPvk4q_hRI5VzXN3Yg_IQsCdOCY";
+const headers = { "apikey": ANON_KEY, "Authorization": `Bearer ${ANON_KEY}`, "Content-Type": "application/json" };
+
+function toast(msg, type) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = "toast " + type + " show";
+  setTimeout(() => el.className = "toast", 2200);
+}
+
+function isAdmin(role) {
+  if (!role) return false;
+  if (Array.isArray(role)) return role.includes("admin");
+  if (typeof role === "string") return role === "admin" || role.includes("admin");
+  return false;
+}
+
+function renderUsers(users) {
+  const container = document.getElementById("users");
+  if (!users.length) {
+    container.innerHTML = '<div class="empty">No se encontraron usuarios</div>';
+    return;
+  }
+  container.innerHTML = users.map(u => {
+    const admin = isAdmin(u.role);
+    const otherRoles = u.role ? (Array.isArray(u.role) ? u.role.filter(r => r !== "admin") : []) : [];
+    const badges = [];
+    if (admin) badges.push('<span class="badge badge-admin">admin</span>');
+    otherRoles.forEach(r => badges.push(`<span class="badge badge-other">${r}</span>`));
+    if (!admin && !otherRoles.length) badges.push('<span class="badge" style="background:#2a2a2a;color:#777;">sin rol</span>');
+
+    return `
+      <div class="user-row" id="row-${u.id}">
+        <div class="user-info">
+          <span class="user-name">${escapeHtml(u.name)}</span>
+          <span class="user-id">ID ${u.id}</span>
+          <div class="role-badges">${badges.join('')}</div>
+        </div>
+        ${admin
+          ? `<button class="toggle-btn remove-admin" onclick="toggleAdmin(${u.id}, '${escapeJs(u.name)}', false)">Quitar admin</button>`
+          : `<button class="toggle-btn make-admin" onclick="toggleAdmin(${u.id}, '${escapeJs(u.name)}', true)">Hacer admin</button>`
+        }
+      </div>`;
+  }).join("");
+}
+
+function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+function escapeJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
+
+async function searchUsers() {
+  const q = document.getElementById("search").value.trim();
+  if (!q) { loadAll(); return; }
+  document.getElementById("users").innerHTML = '<div class="loading">Buscando...</div>';
+
+  try {
+    const r = await fetch(`${BASE}/rest/v1/users?select=id,name,role&name=ilike.%25${encodeURIComponent(q)}%25&order=name.asc&limit=30`,
+      { headers: { ...headers, "Content-Type": undefined } });
+    if (!r.ok) throw new Error(r.status);
+    renderUsers(await r.json());
+  } catch (e) {
+    document.getElementById("users").innerHTML = '<div class="empty">Error al buscar</div>';
+    toast("Error al buscar usuarios", "error");
+  }
+}
+
+async function loadAll() {
+  document.getElementById("users").innerHTML = '<div class="loading">Cargando...</div>';
+  try {
+    const r = await fetch(`${BASE}/rest/v1/users?select=id,name,role&order=id.desc&limit=50`,
+      { headers: { ...headers, "Content-Type": undefined } });
+    if (!r.ok) throw new Error(r.status);
+    renderUsers(await r.json());
+  } catch (e) {
+    document.getElementById("users").innerHTML = '<div class="empty">Error al cargar</div>';
+    toast("Error al cargar usuarios", "error");
+  }
+}
+
+async function toggleAdmin(id, name, makeAdmin) {
+  const newRole = makeAdmin ? ["admin"] : [];
+  const btn = document.querySelector(`#row-${id} .toggle-btn`);
+  if (btn) btn.disabled = true;
+
+  try {
+    const r = await fetch(`${BASE}/rest/v1/users?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...headers, "Prefer": "return=representation" },
+      body: JSON.stringify({ role: newRole }),
+    });
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    toast(makeAdmin ? `✅ "${name}" ahora es admin` : `🔓 Admin removido de "${name}"`,
+          "success");
+    // Refrescar la lista
+    if (document.getElementById("search").value.trim()) searchUsers();
+    else loadAll();
+  } catch (e) {
+    toast(`❌ Error: no se pudo actualizar`, "error");
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Enter key para buscar
+document.getElementById("search").addEventListener("keydown", e => {
+  if (e.key === "Enter") searchUsers();
+});
+
+// Cargar al iniciar
+loadAll();
+</script>
+
+
+<div popover="manual" style="z-index: 2147483647 !important; padding: 0px !important; margin: 0px !important; border-radius: 8px !important; position: fixed !important; color-scheme: normal !important; box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px 0px, rgba(0, 0, 0, 0.18) 0px 8px 15px 6px !important; border: 1px solid rgba(0, 0, 0, 0.9) !important; overflow: hidden !important; backdrop-filter: blur(20px) !important; background-color: rgba(35, 35, 35, 0.83) !important; top: 162px !important; left: 552px !important; opacity: 0 !important; visibility: hidden !important;"><template shadowrootmode="open"><iframe src="chrome-extension://mfbcdcnpokpoajjciilocoachedjkima/completion_list.html?username=Jes%C3%BAs&amp;colorScheme=&amp;screenX=0&amp;screenY=0&amp;effectiveWindowWidth=1688.17&amp;isDark=true" frameborder="0" style="width: 9001px !important; height: 100% !important; display: block !important;"></iframe></template></div><div popover="manual" style="z-index: 2147483647 !important; padding: 0px !important; margin: 0px !important; border-radius: 8px !important; position: fixed !important; color-scheme: normal !important; box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px 0px, rgba(0, 0, 0, 0.18) 0px 8px 15px 6px !important; border: 1px solid rgba(0, 0, 0, 0.9) !important; overflow: hidden !important; backdrop-filter: blur(20px) !important; background-color: rgba(35, 35, 35, 0.83) !important; top: 162px !important; left: 560px !important; opacity: 0 !important; visibility: hidden !important;"><template shadowrootmode="open"><iframe src="chrome-extension://mfbcdcnpokpoajjciilocoachedjkima/completion_list.html?username=Jes%C3%BAs&amp;colorScheme=&amp;screenX=0&amp;screenY=0&amp;effectiveWindowWidth=1688.17&amp;isDark=true" frameborder="0" style="width: 9001px !important; height: 100% !important; display: block !important;"></iframe></template></div></body></html>
