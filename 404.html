@@ -1,8 +1,34 @@
 <!doctype html>
 <html>
     <head>
+        <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" href="/icon.jpg" type="image/x-icon">
+        <title>404</title>
+        <script>
+            // The site was reorganised: old paths now live somewhere else.
+            // GitHub Pages serves this page for any missing path, so we redirect
+            // here to keep old bookmarks / external links working.
+            (function () {
+                var MAP = {
+                    "/primecalc":     "/tools/primecalc/",
+                    "/gameoflife":    "/tools/gameoflife/",
+                    "/pong":          "/tools/pong/",
+                    "/compressly":    "/tools/compressly/",
+                    "/mdtopdf":       "/tools/mdtopdf/",
+                    "/mdtopdf.html":  "/tools/mdtopdf/",
+                    "/lishu":         "/pages/lishu/",
+                    "/bears":         "/pages/bears/",
+                    "/dejacky":       "/jacky/dejacky.html",
+                    "/dejacky.html":  "/jacky/dejacky.html",
+                    "/dejackyadmin":  "/jacky/dejackyadmin.html",
+                    "/dejackyadmin.html": "/jacky/dejackyadmin.html"
+                };
+                var path = location.pathname.replace(/\/+$/, "").toLowerCase();
+                if (path === "") { path = "/"; }
+                if (MAP[path]) { location.replace(MAP[path]); }
+            })();
+        </script>
     </head>
     <body>
         <h1>
@@ -13,22 +39,19 @@
         </p>
         <ul>
             <li>
-                <a href="/">Home</a>
+                <a href="https://blog.lqh2011.com">Blog (home)</a>
             </li>
             <li>
-                <a href="/lishu">Lishu</a>
+                <a href="/tools/">My works / tools</a>
             </li>
             <li>
-                <a href="/bears">Bears</a>
+                <a href="/pages/lishu/">Lishu</a>
+            </li>
+            <li>
+                <a href="/pages/bears/">Bears</a>
             </li>
             <li>
                 <a href="https://note.ms/lqh2011">My notepad</a>
-            </li>
-            <li>
-                <a href="primecalc">A prime number checker</a>
-            </li>
-            <li>
-                <a href="/gameoflife">Game of Life</a>
             </li>
         </ul>
     </body>
