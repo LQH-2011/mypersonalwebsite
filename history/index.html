@@ -1,58 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Every past version of the lqh2011.com homepage, reconstructed from git history.">
 <title>History — lqh2011.com</title>
 <link rel="icon" href="/icon.jpg" type="image/x-icon">
-<style>:root{--bg:#0b0d0c;--fg:#d7e0d7;--dim:#7d8a7d;--accent:#3ddc6a;--card:#121614;--line:#1e2621;}
-*{box-sizing:border-box}
-body{margin:0;padding:20px;height:100vh;display:flex;flex-direction:column;gap:14px;
-     background:var(--bg);color:var(--fg);line-height:1.5;
-     font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-header h1{font-size:1.3rem;font-weight:700;letter-spacing:-.02em;margin:0}
-.sub{color:var(--dim);font-size:.85rem;margin:5px 0 0}
-.sub a,footer a{color:var(--accent);text-decoration:none}
-.wrap{display:flex;gap:14px;flex:1;min-height:0}
-#list{width:320px;overflow-y:auto;background:var(--card);border:1px solid var(--line);
-      border-radius:8px;padding:6px;flex:none}
-.item{padding:8px 10px;border-radius:6px;cursor:pointer;border-left:2px solid transparent}
-.item:hover{background:#182019}
-.item.active{background:#15251a;border-left-color:var(--accent)}
-.item .d{font-weight:600}
-.item .s{display:block;color:var(--dim);font-size:.78rem}
-.item .h{color:#4a5a4d;font-size:.72rem}
-main{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff;
-     border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;
-     padding:8px 12px;background:var(--card);border-bottom:1px solid var(--line);
-     color:var(--dim);font-size:.8rem}
-.bar a{color:var(--accent);text-decoration:none;white-space:nowrap}
-iframe{flex:1;width:100%;border:0;background:#fff}
-footer{color:var(--dim);font-size:.78rem}
-@media(max-width:760px){.wrap{flex-direction:column}#list{width:auto;max-height:28vh}}
-</style>
+<link rel="stylesheet" href="/assets/site.css">
+<style>:root{--width:1000px}</style>
 </head>
 <body>
-<header>
-    <h1>History of lqh2011.com</h1>
-    <p class="sub">56 versions of the homepage, rebuilt from git history
-        (2024-08-01 &rarr; 2026-05-27). &larr; <a href="/tools/">my works</a></p>
-</header>
-<div class="wrap">
-    <nav id="list" aria-label="Versions"></nav>
-    <main>
-        <div class="bar">
+<nav>
+    <span>
+        <a href="https://blog.lqh2011.com">Home</a> &bull;
+        <a href="/tools/">My works</a> &bull;
+        <a href="/pages/">Pages</a> &bull;
+        <a href="/jacky/">Jacky</a> &bull;
+        <a href="/history/">History</a>
+    </span>
+    <span class="clock" id="clock"></span>
+</nav>
+
+<div class="hx">
+    <div class="hx-list" id="list" aria-label="Versions"></div>
+    <div class="hx-main">
+        <div class="hx-bar">
             <span id="meta"></span>
             <a id="open" href="#" target="_blank" rel="noopener">open in new tab &nearr;</a>
         </div>
         <iframe id="view" title="Homepage version preview"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
-    </main>
+    </div>
 </div>
-<footer>Snapshots are shown live in a sandboxed frame; a few old links or images may
-    have since moved. Pick a version on the left.</footer>
+
+<footer>
+    <p>56 versions of the homepage, rebuilt from git history (2024-08-01 &rarr; 2026-05-27).</p>
+    <p><a href="mailto:jesus@lqh2011.com">jesus@lqh2011.com</a></p>
+    <p>&copy; <span id="year">2026</span> Jesús Luo, All Rights Reserved</p>
+</footer>
+<script>
+    (function u(){var d=document.getElementById('clock');if(!d)return;var t=new Date();d.textContent=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');setTimeout(u,1e3-t.getMilliseconds())})();
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>
 <script>
 const VERSIONS = [{"hash": "a96c604", "date": "2024-08-01", "subject": "Add files via upload", "title": "", "file": "2024-08-01-a96c604.html", "bytes": 321}, {"hash": "3e6c552", "date": "2024-08-01", "subject": "Update index.html", "title": "", "file": "2024-08-01-3e6c552.html", "bytes": 324}, {"hash": "b04c045", "date": "2024-08-01", "subject": "Update index.html", "title": "", "file": "2024-08-01-b04c045.html", "bytes": 923}, {"hash": "17b5a25", "date": "2024-08-01", "subject": "Update index.html", "title": "", "file": "2024-08-01-17b5a25.html", "bytes": 951}, {"hash": "780d3f4", "date": "2024-08-02", "subject": "Update index.html", "title": "", "file": "2024-08-02-780d3f4.html", "bytes": 1024}, {"hash": "c4ff57d", "date": "2024-08-02", "subject": "Update index.html", "title": "", "file": "2024-08-02-c4ff57d.html", "bytes": 1023}, {"hash": "314bfea", "date": "2024-08-06", "subject": "Update index.html", "title": "", "file": "2024-08-06-314bfea.html", "bytes": 974}, {"hash": "102a1da", "date": "2024-08-19", "subject": "Update index.html", "title": "", "file": "2024-08-19-102a1da.html", "bytes": 946}, {"hash": "5b08d28", "date": "2024-08-21", "subject": "Update index.html", "title": "", "file": "2024-08-21-5b08d28.html", "bytes": 984}, {"hash": "e8b6a72", "date": "2024-08-26", "subject": "Update index.html", "title": "", "file": "2024-08-26-e8b6a72.html", "bytes": 1214}, {"hash": "214f5a2", "date": "2024-08-27", "subject": "Update index.html", "title": "", "file": "2024-08-27-214f5a2.html", "bytes": 984}, {"hash": "3790702", "date": "2024-08-27", "subject": "Update index.html", "title": "", "file": "2024-08-27-3790702.html", "bytes": 1019}, {"hash": "4c9b52e", "date": "2024-08-27", "subject": "Update index.html", "title": "", "file": "2024-08-27-4c9b52e.html", "bytes": 1040}, {"hash": "ed84952", "date": "2024-08-27", "subject": "Update index.html", "title": "", "file": "2024-08-27-ed84952.html", "bytes": 1085}, {"hash": "f525905", "date": "2024-09-03", "subject": "update index.html", "title": "", "file": "2024-09-03-f525905.html", "bytes": 1130}, {"hash": "5943ab0", "date": "2024-10-12", "subject": "update website", "title": "", "file": "2024-10-12-5943ab0.html", "bytes": 1156}, {"hash": "403e710", "date": "2024-10-12", "subject": "update website", "title": "", "file": "2024-10-12-403e710.html", "bytes": 1156}, {"hash": "6b86a2a", "date": "2025-02-10", "subject": "Update index.html", "title": "", "file": "2025-02-10-6b86a2a.html", "bytes": 1257}, {"hash": "c6d09d9", "date": "2025-03-31", "subject": "update index.html", "title": "", "file": "2025-03-31-c6d09d9.html", "bytes": 1254}, {"hash": "5af3895", "date": "2025-04-21", "subject": "Update index.html", "title": "", "file": "2025-04-21-5af3895.html", "bytes": 1255}, {"hash": "5013921", "date": "2025-05-05", "subject": "update index.html", "title": "", "file": "2025-05-05-5013921.html", "bytes": 1639}, {"hash": "cd10c0b", "date": "2025-05-05", "subject": "Update index.html", "title": "", "file": "2025-05-05-cd10c0b.html", "bytes": 1582}, {"hash": "88781e4", "date": "2025-05-07", "subject": "Update index.html", "title": "", "file": "2025-05-07-88781e4.html", "bytes": 1637}, {"hash": "0825b64", "date": "2025-05-10", "subject": "Update index.html", "title": "", "file": "2025-05-10-0825b64.html", "bytes": 1640}, {"hash": "976e827", "date": "2025-05-18", "subject": "Update index.html", "title": "", "file": "2025-05-18-976e827.html", "bytes": 1862}, {"hash": "0543385", "date": "2025-05-31", "subject": "Update index.html", "title": "", "file": "2025-05-31-0543385.html", "bytes": 1859}, {"hash": "d72273b", "date": "2025-05-31", "subject": "Update index.html", "title": "", "file": "2025-05-31-d72273b.html", "bytes": 1858}, {"hash": "3c32c68", "date": "2025-06-02", "subject": "Update index.html", "title": "", "file": "2025-06-02-3c32c68.html", "bytes": 1972}, {"hash": "bd20771", "date": "2025-06-14", "subject": "Update index.html", "title": "", "file": "2025-06-14-bd20771.html", "bytes": 1972}, {"hash": "bc0db1a", "date": "2025-06-29", "subject": "Update index.html", "title": "", "file": "2025-06-29-bc0db1a.html", "bytes": 2070}, {"hash": "6efd999", "date": "2025-07-03", "subject": "Update index.html", "title": "", "file": "2025-07-03-6efd999.html", "bytes": 2064}, {"hash": "424b3d9", "date": "2025-07-03", "subject": "Update index.html", "title": "", "file": "2025-07-03-424b3d9.html", "bytes": 2064}, {"hash": "1fc9f8b", "date": "2025-07-19", "subject": "Update index.html", "title": "", "file": "2025-07-19-1fc9f8b.html", "bytes": 2171}, {"hash": "24ade31", "date": "2025-07-29", "subject": "Update index.html", "title": "", "file": "2025-07-29-24ade31.html", "bytes": 2171}, {"hash": "8ffffda", "date": "2025-08-03", "subject": "Update index.html", "title": "", "file": "2025-08-03-8ffffda.html", "bytes": 2260}, {"hash": "f64a86c", "date": "2025-08-05", "subject": "Actualizar index.html", "title": "", "file": "2025-08-05-f64a86c.html", "bytes": 2577}, {"hash": "a623ca5", "date": "2025-08-06", "subject": "Actualizar index.html", "title": "", "file": "2025-08-06-a623ca5.html", "bytes": 2615}, {"hash": "697eea6", "date": "2025-08-09", "subject": "Actualizar index.html", "title": "", "file": "2025-08-09-697eea6.html", "bytes": 2756}, {"hash": "af266d4", "date": "2025-08-09", "subject": "Actualizar index.html", "title": "", "file": "2025-08-09-af266d4.html", "bytes": 2784}, {"hash": "7526312", "date": "2025-08-13", "subject": "Update index.html", "title": "", "file": "2025-08-13-7526312.html", "bytes": 2845}, {"hash": "ce666f1", "date": "2025-08-13", "subject": "Update index.html & peek.html", "title": "", "file": "2025-08-13-ce666f1.html", "bytes": 3181}, {"hash": "1225ad3", "date": "2025-08-13", "subject": "Update index.html", "title": "", "file": "2025-08-13-1225ad3.html", "bytes": 3298}, {"hash": "cf9f09a", "date": "2025-08-20", "subject": "Actualizar index.html", "title": "", "file": "2025-08-20-cf9f09a.html", "bytes": 3478}, {"hash": "e7b60c4", "date": "2025-08-23", "subject": "Actualizar index.html", "title": "", "file": "2025-08-23-e7b60c4.html", "bytes": 3634}, {"hash": "6d48de7", "date": "2025-08-28", "subject": "Actualizar index.html", "title": "", "file": "2025-08-28-6d48de7.html", "bytes": 3502}, {"hash": "803d89e", "date": "2025-08-29", "subject": "Actualizar index.html", "title": "Home", "file": "2025-08-29-803d89e.html", "bytes": 3531}, {"hash": "e8fa76c", "date": "2025-10-19", "subject": "Actualizar index.html", "title": "Home", "file": "2025-10-19-e8fa76c.html", "bytes": 3583}, {"hash": "0d27590", "date": "2025-11-15", "subject": "Actualizar index.html", "title": "Home", "file": "2025-11-15-0d27590.html", "bytes": 3680}, {"hash": "949ed3c", "date": "2025-11-15", "subject": "Refactor HTML structure and update styles", "title": "Home", "file": "2025-11-15-949ed3c.html", "bytes": 3748}, {"hash": "aa28c97", "date": "2025-11-21", "subject": "Mega update", "title": "LQH-2011", "file": "2025-11-21-aa28c97.html", "bytes": 13274}, {"hash": "7c1ded5", "date": "2025-12-06", "subject": "Add icon", "title": "LQH-2011", "file": "2025-12-06-7c1ded5.html", "bytes": 13392}, {"hash": "3bfba85", "date": "2026-01-18", "subject": "Edit contact mail", "title": "LQH-2011", "file": "2026-01-18-3bfba85.html", "bytes": 13398}, {"hash": "9d22160", "date": "2026-01-30", "subject": "Actualizar index.html", "title": "LQH-2011", "file": "2026-01-30-9d22160.html", "bytes": 13397}, {"hash": "b167ab0", "date": "2026-04-25", "subject": "Update NFLS link", "title": "LQH-2011", "file": "2026-04-25-b167ab0.html", "bytes": 13415}, {"hash": "b1e2437", "date": "2026-04-25", "subject": "Reupdate NFLS link", "title": "LQH-2011", "file": "2026-04-25-b1e2437.html", "bytes": 13418}, {"hash": "44fdba6", "date": "2026-05-27", "subject": "Añadir enlace a Compressly a página de inicio", "title": "LQH-2011", "file": "2026-05-27-44fdba6.html", "bytes": 13517}];
 const esc = s => String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
@@ -60,22 +49,20 @@ const list = document.getElementById('list');
 const view = document.getElementById('view');
 const meta = document.getElementById('meta');
 const openLink = document.getElementById('open');
-let current = -1;
 function select(i) {
     const v = VERSIONS[i];
     if (!v) return;
-    current = i;
     view.src = v.file;
     openLink.href = v.file;
-    meta.textContent = v.date + ' \u00b7 ' + v.subject + ' \u00b7 ' + v.hash;
-    document.querySelectorAll('.item').forEach((el, j) => el.classList.toggle('active', j === i));
+    meta.textContent = v.date + ' · ' + v.subject + ' · ' + v.hash;
+    document.querySelectorAll('.hx-item').forEach((el, j) => el.classList.toggle('active', j === i));
 }
 VERSIONS.forEach((v, i) => {
     const el = document.createElement('div');
-    el.className = 'item';
-    el.innerHTML = '<span class="d">' + esc(v.date) + '</span>'
-                 + '<span class="s">' + esc(v.subject) + (v.title ? ' \u2014 ' + esc(v.title) : '') + '</span>'
-                 + '<span class="h">' + esc(v.hash) + '</span>';
+    el.className = 'hx-item';
+    el.innerHTML = '<span class="hx-date">' + esc(v.date) + '</span>'
+                 + '<span class="hx-sub">' + esc(v.subject) + (v.title ? ' — ' + esc(v.title) : '') + '</span>'
+                 + '<span class="hx-hash">' + esc(v.hash) + '</span>';
     el.addEventListener('click', () => select(i));
     list.appendChild(el);
 });

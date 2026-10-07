@@ -1,0 +1,211 @@
+/* lqh2011.com — shared style for the site's own pages (works hub, directory
+   maps, history viewer, 404). Matches the design of blog.lqh2011.com and
+   start.lqh2011.com: light, system sans-serif, 680px column, muted greys.
+   Honours the OS dark preference like start.lqh2011.com does. */
+
+:root {
+  --bg: #ffffff;
+  --ink: #111111;
+  --muted: #666666;
+  --faint: #999999;
+  --line: #e5e5e5;
+  --code-bg: #f5f5f5;
+  --width: 680px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    --bg: #111111;
+    --ink: #e8e8e8;
+    --muted: #9a9a9a;
+    --faint: #6b6b6b;
+    --line: #333333;
+    --code-bg: #1c1c1c;
+    color-scheme: dark;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; width: 100%; margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* ── Typography ── */
+h1, h2, h3 { line-height: 1.25; font-weight: 600; letter-spacing: -0.02em; }
+h1 { font-size: 2rem; margin: 1.5rem 0 1.25rem; }
+h2 { font-size: 1.4rem; margin: 2.5rem 0 1.25rem; }
+h3 { font-size: 1.15rem; margin: 2rem 0 1.25rem; }
+p, ul, ol { margin: 0 0 1.25rem; }
+
+/* ── Centered column ── */
+nav,
+article > *:not(pre):not(figure),
+footer {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  max-width: var(--width);
+  width: 100%;
+}
+
+article { flex: 1; padding: 0 0 4rem; }
+
+/* ── Nav (bullet links + clock, like the blog) ── */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.clock { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+/* ── Links ── */
+a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  transition: border-color 0.15s;
+}
+a:hover { border-bottom-color: var(--ink); }
+nav a { color: var(--muted); border-bottom: none; }
+nav a:hover { color: var(--ink); }
+footer a { border-bottom: none; }
+
+/* ── Directory maps (definition-style rows) ──
+   NOTE: never use `margin`/`padding` shorthands here — a class selector
+   (0,1,0) would beat the `article > *` centering rule (0,0,3) and break it. */
+.list { list-style: none; margin-top: 0; margin-bottom: 1.25rem; }
+.list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.list li:last-child { border-bottom: none; }
+.list .name { font-weight: 500; }
+.list .name a { border-bottom: none; }
+.list .desc { color: var(--muted); font-size: 0.9rem; }
+
+/* ── Code ── */
+code {
+  font-size: 0.9em;
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  background: var(--code-bg);
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+}
+
+/* ── Footer ── */
+footer {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+}
+footer p { margin: 0 0 0.3rem; }
+
+/* ── History viewer ── */
+.hx {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  padding-bottom: 1.5rem;
+  max-width: var(--width);
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 1rem;
+}
+.hx-list {
+  width: 300px;
+  flex: none;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.hx-item {
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  border-bottom: 1px solid var(--line);
+}
+.hx-item:last-child { border-bottom: none; }
+.hx-item:hover { background: var(--code-bg); }
+.hx-item.active { border-left-color: var(--ink); background: var(--code-bg); }
+.hx-date { font-weight: 500; display: block; }
+.hx-sub { display: block; color: var(--muted); font-size: 0.78rem; }
+.hx-hash {
+  display: block;
+  color: var(--faint);
+  font-size: 0.72rem;
+  font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+}
+.hx-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.hx-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.hx-bar a { border-bottom: none; color: var(--muted); white-space: nowrap; }
+.hx-bar a:hover { color: var(--ink); }
+.hx-main iframe { flex: 1; width: 100%; border: 0; background: #fff; }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.1rem; }
+  nav {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+    padding-top: 1.25rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .hx { flex-direction: column; padding-left: 1.25rem; padding-right: 1.25rem; }
+  .hx-list { width: auto; max-height: 30vh; }
+  article { padding-bottom: 2rem; }
+  footer { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+}

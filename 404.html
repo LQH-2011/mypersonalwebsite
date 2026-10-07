@@ -1,58 +1,68 @@
-<!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="/icon.jpg" type="image/x-icon">
-        <title>404</title>
-        <script>
-            // The site was reorganised: old paths now live somewhere else.
-            // GitHub Pages serves this page for any missing path, so we redirect
-            // here to keep old bookmarks / external links working.
-            (function () {
-                var MAP = {
-                    "/primecalc":     "/tools/primecalc/",
-                    "/gameoflife":    "/tools/gameoflife/",
-                    "/pong":          "/tools/pong/",
-                    "/compressly":    "/tools/compressly/",
-                    "/mdtopdf":       "/tools/mdtopdf/",
-                    "/mdtopdf.html":  "/tools/mdtopdf/",
-                    "/lishu":         "/pages/lishu/",
-                    "/bears":         "/pages/bears/",
-                    "/dejacky":       "/jacky/dejacky.html",
-                    "/dejacky.html":  "/jacky/dejacky.html",
-                    "/dejackyadmin":  "/jacky/dejackyadmin.html",
-                    "/dejackyadmin.html": "/jacky/dejackyadmin.html"
-                };
-                var path = location.pathname.replace(/\/+$/, "").toLowerCase();
-                if (path === "") { path = "/"; }
-                if (MAP[path]) { location.replace(MAP[path]); }
-            })();
-        </script>
-    </head>
-    <body>
-        <h1>
-            <b>404</b>
-        </h1>
-        <p>
-            Haven't found what you're looking for? Try these:
-        </p>
-        <ul>
-            <li>
-                <a href="https://blog.lqh2011.com">Blog (home)</a>
-            </li>
-            <li>
-                <a href="/tools/">My works / tools</a>
-            </li>
-            <li>
-                <a href="/pages/lishu/">Lishu</a>
-            </li>
-            <li>
-                <a href="/pages/bears/">Bears</a>
-            </li>
-            <li>
-                <a href="https://note.ms/lqh2011">My notepad</a>
-            </li>
-        </ul>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/icon.jpg" type="image/x-icon">
+<link rel="stylesheet" href="/assets/site.css">
+<title>404 — lqh2011.com</title>
+<script>
+    // The site was reorganised: old paths now live somewhere else.
+    // GitHub Pages serves this page for any missing path, so we redirect here
+    // to keep old bookmarks / external links working.
+    (function () {
+        var MAP = {
+            "/primecalc":     "/tools/primecalc/",
+            "/gameoflife":    "/tools/gameoflife/",
+            "/pong":          "/tools/pong/",
+            "/compressly":    "/tools/compressly/",
+            "/mdtopdf":       "/tools/mdtopdf/",
+            "/mdtopdf.html":  "/tools/mdtopdf/",
+            "/lishu":         "/pages/lishu/",
+            "/bears":         "/pages/bears/",
+            "/dejacky":       "/jacky/dejacky.html",
+            "/dejacky.html":  "/jacky/dejacky.html",
+            "/dejackyadmin":  "/jacky/dejackyadmin.html",
+            "/dejackyadmin.html": "/jacky/dejackyadmin.html"
+        };
+        var path = location.pathname.replace(/\/+$/, "").toLowerCase();
+        if (path === "") { path = "/"; }
+        if (MAP[path]) { location.replace(MAP[path]); }
+    })();
+</script>
+</head>
+<body>
+<nav>
+    <span>
+        <a href="https://blog.lqh2011.com">Home</a> &bull;
+        <a href="/tools/">My works</a> &bull;
+        <a href="/pages/">Pages</a> &bull;
+        <a href="/jacky/">Jacky</a> &bull;
+        <a href="/history/">History</a>
+    </span>
+    <span class="clock" id="clock"></span>
+</nav>
+
+<article>
+    <h1>404</h1>
+    <p>Haven&rsquo;t found what you&rsquo;re looking for? Try these:</p>
+    <ul class="list">
+        <li><span class="name"><a href="https://blog.lqh2011.com">Blog</a></span> <span class="desc">home</span></li>
+        <li><span class="name"><a href="/tools/">My works</a></span> <span class="desc">the small tools</span></li>
+        <li><span class="name"><a href="/history/">History</a></span> <span class="desc">past versions of the homepage</span></li>
+        <li><span class="name"><a href="/pages/lishu/">Lishu</a></span></li>
+        <li><span class="name"><a href="/pages/bears/">Bears</a></span></li>
+        <li><span class="name"><a href="https://note.ms/lqh2011">My notepad</a></span></li>
+    </ul>
+</article>
+
+<footer>
+    <p><a href="mailto:jesus@lqh2011.com">jesus@lqh2011.com</a></p>
+    <p>&copy; <span id="year">2026</span> Jesús Luo, All Rights Reserved</p>
+</footer>
+<script>
+    (function u(){var d=document.getElementById('clock');if(!d)return;var t=new Date();d.textContent=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');setTimeout(u,1e3-t.getMilliseconds())})();
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
 </html>
