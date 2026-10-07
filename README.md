@@ -17,10 +17,14 @@ Personal site of **Jesús Luo** (**LQH-2011**). Plain static HTML on GitHub Page
 | `/tools/gameoflife/` | Conway's Game of Life |
 | `/tools/pong/` | Configurable Pong |
 | `/tools/compressly/` | Photo compressor |
-| `/pages/lishu/`, `/pages/bears/` | Odd one-off pages |
-| `/jacky/` | Jacky-forum related pages |
+| `/pages/` | Odd one-off pages — Lishu, Bears (has its own index) |
+| `/jacky/` | Jacky-forum related pages (has its own index) |
+| `/history/` | Every past version of the homepage, rebuilt from git history |
 | `/forum/` | Redirect to [zhujingqi.com/forum](https://zhujingqi.com/forum) |
 | `404.html` | Custom 404, also redirects old (pre-reorg) paths to their new homes |
+
+Every directory has its own `index.html` describing what lives in it. Folders that hold a
+single tool (`/tools/pong/`, etc.) use that tool's own page as the index.
 
 There is no build step — edit the files and push.
 
