@@ -147,6 +147,7 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
         }
         .close-settings-btn {
+            min-height: 44px;
             background: transparent;
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -791,6 +792,7 @@
             let originalDataURL = null;
             let compressedBlob = null;
             let compressedDataURL = null;
+            let compressionError = false;
             let originalImgElement = null;
             let currentFormat = 'image/jpeg'; // default
             // Invalidate asynchronous readers/encoders on replacement, clear, or new settings.
@@ -925,7 +927,7 @@
                 localStorage.setItem('photoCompressorLang', lang);
                 langSelect.value = lang;
                 updateStaticTexts();
-                if (compressedBlob) {
+                if (compressedBlob || compressionError) {
                     updateCompressedInfo();
                 }
                 if (originalFile && originalImgElement) {
@@ -1033,11 +1035,12 @@
                 if (!dims) return;
 
                 const generation = ++compressionGeneration;
-                compressedBlob = null;
+                clearCompressedPreview();
                 updateCompressedInfo();
                 const fail = () => {
                     if (generation !== compressionGeneration) return;
-                    compressedInfo.textContent = t('toastCompressError');
+                    compressionError = true;
+                    updateCompressedInfo();
                     showToast(t('toastCompressError'), 'error');
                 };
                 try {
@@ -1067,6 +1070,16 @@
                 }
             }
 
+            function clearCompressedPreview() {
+                if (compressedDataURL) URL.revokeObjectURL(compressedDataURL);
+                compressedDataURL = null;
+                compressedBlob = null;
+                compressionError = false;
+                compressedImage.removeAttribute('src');
+                btnDownload.disabled = true;
+                btnCopy.disabled = true;
+            }
+
             function updateCompressedInfo() {
                 if (compressedBlob) {
                     const compSize = compressedBlob.size;
@@ -1083,7 +1096,8 @@
                     btnDownload.disabled = false;
                     btnCopy.disabled = copying || !canCopyImage();
                 } else {
-                    compressedInfo.innerHTML = `<span style="color:#94a3b8;">${t('processing')}</span>`;
+                    if (compressionError) compressedInfo.textContent = t('toastCompressError');
+                    else compressedInfo.innerHTML = `<span style="color:#94a3b8;">${t('processing')}</span>`;
                     btnDownload.disabled = true;
                     btnCopy.disabled = true;
                 }
@@ -1145,6 +1159,7 @@
                 const fail = () => {
                     if (generation !== imageGeneration) return;
                     originalFile = null;
+                    originalDataURL = null;
                     originalImgElement = null;
                     originalImage.removeAttribute('src');
                     previewArea.classList.remove('active');
@@ -1199,15 +1214,11 @@
                     showToast(t('toastInvalidImage'), 'error');
                     return;
                 }
-                if (compressedDataURL && compressedDataURL.startsWith('blob:')) {
-                    URL.revokeObjectURL(compressedDataURL);
-                    compressedDataURL = null;
-                }
-                compressedBlob = null;
-                compressedImage.src = '';
-                compressedInfo.innerHTML = `<span style="color:#94a3b8;">${t('processing')}</span>`;
-                btnDownload.disabled = true;
-                btnCopy.disabled = true;
+                clearCompressedPreview();
+                updateCompressedInfo();
+                originalDataURL = null;
+                originalImage.removeAttribute('src');
+                originalInfo.textContent = '';
                 imageGeneration++;
                 compressionGeneration++;
                 originalImgElement = null;
@@ -1303,16 +1314,11 @@
             btnClear.addEventListener('click', function() {
                 imageGeneration++;
                 compressionGeneration++;
-                if (compressedDataURL && compressedDataURL.startsWith('blob:')) {
-                    URL.revokeObjectURL(compressedDataURL);
-                }
+                clearCompressedPreview();
                 originalFile = null;
                 originalDataURL = null;
-                compressedBlob = null;
-                compressedDataURL = null;
                 originalImgElement = null;
-                originalImage.src = '';
-                compressedImage.src = '';
+                originalImage.removeAttribute('src');
                 originalInfo.innerHTML = '';
                 compressedInfo.innerHTML = '';
                 qualitySlider.value = 75;

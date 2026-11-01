@@ -90,6 +90,7 @@ def test_settings_disable_stale_export(page):
     page.locator('#formatSelect').select_option('image/jpeg')
     page.wait_for_function('pendingEncodes.length === 1')
     expect(page.locator('#btnDownload')).to_be_disabled()
+    assert not page.locator('#compressedImage').get_attribute('src')
     page.evaluate('pendingEncodes.shift()()')
     ready(page)
 
@@ -111,6 +112,20 @@ def test_copy_writes_real_png_without_downloading(page, fmt):
     ready(page)
     page.locator('#formatSelect').select_option(fmt)
     ready(page)
+    expected = page.evaluate("""async () => {
+        window.imagePixels = async blob => {
+            const image = await createImageBitmap(blob);
+            const canvas = document.createElement('canvas');
+            canvas.width = image.width; canvas.height = image.height;
+            const ctx = canvas.getContext('2d'); ctx.drawImage(image, 0, 0);
+            image.close();
+            return Array.from(ctx.getImageData(0, 0, canvas.width, canvas.height).data);
+        };
+        return await imagePixels(await (await fetch(document.querySelector('#compressedImage').src)).blob());
+    }""")
+    if fmt != 'image/png':
+        original = page.evaluate("async () => imagePixels(await (await fetch(document.querySelector('#originalImage').src)).blob())")
+        assert expected != original, 'Fixture must distinguish compressed pixels from original'
     expect(page.locator('#btnCopy')).to_be_enabled()
     page.locator('#btnCopy').click()
     expect(page.locator('#toast')).to_contain_text('copied')
@@ -121,6 +136,8 @@ def test_copy_writes_real_png_without_downloading(page, fmt):
         return {type: blob.type, width: image.width, height: image.height};
     }""")
     assert result == {'type': 'image/png', 'width': 32, 'height': 24}
+    actual = page.evaluate("async () => imagePixels(await (await navigator.clipboard.read())[0].getType('image/png'))")
+    assert actual == expected, 'Clipboard must contain the compressed output pixels'
     assert not downloads
 
 
@@ -132,6 +149,36 @@ def test_copy_permission_failure_preserves_download(page):
     expect(page.locator('#toast')).to_have_class(re.compile('error'))
     expect(page.locator('#btnDownload')).to_be_enabled()
     expect(page.locator('#btnCopy')).to_be_enabled()
+
+
+def test_failed_compression_follows_language_change(page):
+    upload(page)
+    ready(page)
+    page.evaluate("() => { HTMLCanvasElement.prototype.getContext = () => null; }")
+    page.locator('#formatSelect').select_option('image/jpeg')
+    expect(page.locator('#compressedInfo')).to_contain_text('Error compressing')
+    page.locator('#settingsBtn').click()
+    page.locator('#langSelect').select_option('de')
+    expect(page.locator('#compressedInfo')).to_contain_text('Fehler beim Komprimieren')
+
+
+def test_settings_close_has_44px_target(page):
+    page.locator('#settingsBtn').click()
+    assert page.locator('#closeSettingsBtn').bounding_box()['height'] >= 44
+
+
+def test_failed_upload_releases_data(page):
+    # Expose closure state only in the test-served response, never in production.
+    html = (ROOT / 'tools/compressly/index.html').read_text()
+    html = html.replace('            init();',
+                        'window.readOriginalData = () => originalDataURL; init();')
+    page.route('**/tools/compressly/', lambda route: route.fulfill(body=html, content_type='text/html'))
+    page.reload()
+    page.locator('#fileInput').set_input_files({
+        'name': 'broken.png', 'mimeType': 'image/png', 'buffer': b'not an image'
+    })
+    expect(page.locator('#toast')).to_have_class(re.compile('error'))
+    assert page.evaluate('readOriginalData()') is None
 
 
 def test_canvas_failure_is_reported(page):
@@ -171,6 +218,7 @@ def test_unsupported_clipboard_keeps_download(page):
 
 @pytest.mark.parametrize('fmt,extension', [('image/png', 'png'), ('image/jpeg', 'jpg'), ('image/webp', 'webp')])
 def test_download_retains_selected_format(page, fmt, extension):
+    """Verify each requested format downloads with matching filename and binary signature."""
     upload(page)
     ready(page)
     page.locator('#formatSelect').select_option(fmt)
