@@ -147,6 +147,7 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
         }
         .close-settings-btn {
+            min-height: 44px;
             background: transparent;
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -366,13 +367,14 @@
 
         /* Buttons */
         .btn-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-            flex-wrap: wrap;
             margin-top: 4px;
         }
         .btn {
             padding: 12px 22px;
+            min-height: 44px;
             border-radius: 10px;
             font-weight: 600;
             font-size: 0.9rem;
@@ -423,6 +425,18 @@
             pointer-events: none;
         }
 
+        .export-hint {
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+        .btn:focus-visible, .settings-btn:focus-visible, input:focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 3px;
+        }
+        .settings-panel { visibility: hidden; }
+        .settings-panel.open { visibility: visible; }
+
         /* Toast */
         .toast {
             position: fixed;
@@ -439,7 +453,9 @@
             opacity: 0;
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
-            white-space: nowrap;
+            max-width: calc(100vw - 32px);
+            text-align: center;
+            white-space: normal;
         }
         .toast.show {
             opacity: 1;
@@ -468,7 +484,7 @@
                 min-width: 100%;
             }
             .btn-row {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
             .btn {
                 width: 100%;
@@ -561,22 +577,29 @@
                     <span id="formatHint" style="font-size:0.78rem;color:var(--text-secondary);">(recomendado: JPEG o WebP)</span>
                 </div>
                 <div class="btn-row">
-                    <button class="btn btn-primary" id="btnDownload">💾 Descargar imagen comprimida</button>
+                    <button class="btn btn-primary" id="btnCopy" disabled>📋 Copiar imagen</button>
+                    <button class="btn btn-outline" id="btnDownload" disabled>💾 Descargar imagen comprimida</button>
                     <button class="btn btn-outline" id="btnReset">🔄 Reiniciar</button>
                     <button class="btn btn-danger" id="btnClear">✕ Eliminar</button>
                 </div>
+                <p class="export-hint" id="copyHint"></p>
             </div>
         </div>
     </div>
 
     <!-- Toast -->
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
         (function() {
             // ---- Translations (extended with German, Simplified Chinese, Traditional Chinese) ----
             const translations = {
                 es: {
+                    btnCopy: "📋 Copiar imagen",
+                    copyHint: "El portapapeles usa PNG; la descarga conserva el formato seleccionado.",
+                    copyUnavailable: "Copiar no está disponible en este navegador. Usa la descarga.",
+                    toastCopySuccess: "✅ Imagen copiada al portapapeles.",
+                    toastCopyError: "No se pudo copiar. Permite el acceso al portapapeles o descarga la imagen.",
                     title: "Compresor de Imágenes",
                     subtitle: "Reduce el tamaño de tus fotos sin perder calidad visible",
                     dropText: "Arrastra y suelta tu imagen aquí",
@@ -610,6 +633,11 @@
                     pageTitle: "Compresor de Imágenes"
                 },
                 en: {
+                    btnCopy: "📋 Copy image",
+                    copyHint: "Clipboard uses PNG; downloads keep your selected format.",
+                    copyUnavailable: "Image copying is unavailable in this browser. Use Download instead.",
+                    toastCopySuccess: "✅ Image copied to clipboard.",
+                    toastCopyError: "Could not copy. Allow clipboard access or download the image.",
                     title: "Image Compressor",
                     subtitle: "Reduce the size of your photos without losing visible quality",
                     dropText: "Drag and drop your image here",
@@ -643,6 +671,11 @@
                     pageTitle: "Image Compressor"
                 },
                 de: {
+                    btnCopy: "📋 Bild kopieren",
+                    copyHint: "Die Zwischenablage verwendet PNG; Downloads behalten das gewählte Format.",
+                    copyUnavailable: "Kopieren ist in diesem Browser nicht verfügbar. Verwenden Sie den Download.",
+                    toastCopySuccess: "✅ Bild in die Zwischenablage kopiert.",
+                    toastCopyError: "Kopieren fehlgeschlagen. Erlauben Sie den Zugriff auf die Zwischenablage oder laden Sie das Bild herunter.",
                     title: "Bildkompressor",
                     subtitle: "Reduzieren Sie die Größe Ihrer Fotos ohne sichtbaren Qualitätsverlust",
                     dropText: "Ziehen Sie Ihr Bild hierher",
@@ -676,6 +709,11 @@
                     pageTitle: "Bildkompressor"
                 },
                 "zh-CN": {
+                    btnCopy: "📋 复制图片",
+                    copyHint: "剪贴板使用 PNG；下载保留所选格式。",
+                    copyUnavailable: "此浏览器不支持复制图片，请使用下载。",
+                    toastCopySuccess: "✅ 图片已复制到剪贴板。",
+                    toastCopyError: "复制失败，请允许访问剪贴板或下载图片。",
                     title: "图片压缩器",
                     subtitle: "减小照片体积，不损失可见质量",
                     dropText: "将图片拖放到此处",
@@ -709,6 +747,11 @@
                     pageTitle: "图片压缩器"
                 },
                 "zh-TW": {
+                    btnCopy: "📋 複製圖片",
+                    copyHint: "剪貼簿使用 PNG；下載保留所選格式。",
+                    copyUnavailable: "此瀏覽器不支援複製圖片，請使用下載。",
+                    toastCopySuccess: "✅ 圖片已複製到剪貼簿。",
+                    toastCopyError: "複製失敗，請允許存取剪貼簿或下載圖片。",
                     title: "圖片壓縮器",
                     subtitle: "減小照片體積，不損失可見品質",
                     dropText: "將圖片拖放到此處",
@@ -749,8 +792,13 @@
             let originalDataURL = null;
             let compressedBlob = null;
             let compressedDataURL = null;
+            let compressionError = false;
             let originalImgElement = null;
             let currentFormat = 'image/jpeg'; // default
+            // Invalidate asynchronous readers/encoders on replacement, clear, or new settings.
+            let imageGeneration = 0;
+            let compressionGeneration = 0;
+            let copying = false;
 
             // ---- DOM Elements ----
             const settingsBtn = document.getElementById('settingsBtn');
@@ -769,6 +817,7 @@
             const qualitySlider = document.getElementById('qualitySlider');
             const qualityValue = document.getElementById('qualityValue');
             const formatSelect = document.getElementById('formatSelect');
+            const btnCopy = document.getElementById('btnCopy');
             const btnDownload = document.getElementById('btnDownload');
             const btnReset = document.getElementById('btnReset');
             const btnClear = document.getElementById('btnClear');
@@ -785,6 +834,8 @@
                 qualityLabel: document.getElementById('qualityLabel'),
                 formatLabel: document.getElementById('formatLabel'),
                 formatHint: document.getElementById('formatHint'),
+                btnCopy: btnCopy,
+                copyHint: document.getElementById('copyHint'),
                 btnDownload: btnDownload,
                 btnReset: btnReset,
                 btnClear: btnClear,
@@ -816,6 +867,8 @@
                 i18nElements.qualityLabel.textContent = t('qualityLabel');
                 i18nElements.formatLabel.textContent = t('formatLabel');
                 i18nElements.formatHint.textContent = t('formatHint');
+                i18nElements.btnCopy.textContent = t('btnCopy');
+                i18nElements.copyHint.textContent = t(canCopyImage() ? 'copyHint' : 'copyUnavailable');
                 i18nElements.btnDownload.textContent = t('btnDownload');
                 i18nElements.btnReset.textContent = t('btnReset');
                 i18nElements.btnClear.textContent = t('btnClear');
@@ -874,7 +927,7 @@
                 localStorage.setItem('photoCompressorLang', lang);
                 langSelect.value = lang;
                 updateStaticTexts();
-                if (compressedBlob) {
+                if (compressedBlob || compressionError) {
                     updateCompressedInfo();
                 }
                 if (originalFile && originalImgElement) {
@@ -981,18 +1034,26 @@
                 const dims = getImageDimensions(originalImgElement);
                 if (!dims) return;
 
-                const canvas = document.createElement('canvas');
-                canvas.width = dims.width;
-                canvas.height = dims.height;
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(originalImgElement, 0, 0, canvas.width, canvas.height);
-
-                const q = quality / 100;
-                canvas.toBlob(
-                    (blob) => {
+                const generation = ++compressionGeneration;
+                clearCompressedPreview();
+                updateCompressedInfo();
+                const fail = () => {
+                    if (generation !== compressionGeneration) return;
+                    compressionError = true;
+                    updateCompressedInfo();
+                    showToast(t('toastCompressError'), 'error');
+                };
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = dims.width;
+                    canvas.height = dims.height;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) throw new Error('Canvas unavailable');
+                    ctx.drawImage(originalImgElement, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob((blob) => {
+                        if (generation !== compressionGeneration) return;
                         if (!blob) {
-                            showToast(t('toastCompressError'), 'error');
+                            fail();
                             return;
                         }
                         compressedBlob = blob;
@@ -1003,10 +1064,20 @@
                         compressedDataURL = url;
                         compressedImage.src = url;
                         updateCompressedInfo();
-                    },
-                    format,
-                    q
-                );
+                    }, format, quality / 100);
+                } catch (error) {
+                    fail();
+                }
+            }
+
+            function clearCompressedPreview() {
+                if (compressedDataURL) URL.revokeObjectURL(compressedDataURL);
+                compressedDataURL = null;
+                compressedBlob = null;
+                compressionError = false;
+                compressedImage.removeAttribute('src');
+                btnDownload.disabled = true;
+                btnCopy.disabled = true;
             }
 
             function updateCompressedInfo() {
@@ -1023,22 +1094,90 @@
                     }
                     compressedInfo.innerHTML = html;
                     btnDownload.disabled = false;
+                    btnCopy.disabled = copying || !canCopyImage();
                 } else {
-                    compressedInfo.innerHTML = `<span style="color:#94a3b8;">${t('processing')}</span>`;
+                    if (compressionError) compressedInfo.textContent = t('toastCompressError');
+                    else compressedInfo.innerHTML = `<span style="color:#94a3b8;">${t('processing')}</span>`;
                     btnDownload.disabled = true;
+                    btnCopy.disabled = true;
                 }
             }
+
+            function canCopyImage() {
+                return window.isSecureContext && typeof navigator.clipboard?.write === 'function' &&
+                    typeof window.ClipboardItem === 'function' &&
+                    (!ClipboardItem.supports || ClipboardItem.supports('image/png'));
+            }
+
+            async function clipboardPng(blob) {
+                if (blob.type === 'image/png') return blob;
+                // Decode the COMPRESSED output, not the original: preserve its quality.
+                const url = URL.createObjectURL(blob);
+                try {
+                    const image = new Image();
+                    image.src = url;
+                    await image.decode();
+                    const canvas = document.createElement('canvas');
+                    canvas.width = image.naturalWidth;
+                    canvas.height = image.naturalHeight;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) throw new Error('Canvas unavailable');
+                    ctx.drawImage(image, 0, 0);
+                    return await new Promise((resolve, reject) => {
+                        canvas.toBlob(png => png ? resolve(png) : reject(new Error('PNG encoding failed')), 'image/png');
+                    });
+                } finally {
+                    URL.revokeObjectURL(url);
+                }
+            }
+
+            btnCopy.addEventListener('click', async function() {
+                if (!compressedBlob || copying || !canCopyImage()) return;
+                const generation = compressionGeneration;
+                const blob = compressedBlob;
+                copying = true;
+                btnCopy.disabled = true;
+                try {
+                    // Start write during the click, retaining Safari's user activation.
+                    const png = clipboardPng(blob);
+                    png.catch(() => {}); // Also handle conversion rejection if write fails first.
+                    await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
+                    if (generation === compressionGeneration) showToast(t('toastCopySuccess'), 'success');
+                } catch (error) {
+                    if (generation === compressionGeneration) showToast(t('toastCopyError'), 'error');
+                } finally {
+                    copying = false;
+                    btnCopy.disabled = !compressedBlob || !canCopyImage();
+                }
+            });
 
             // ---- Load original image ----
             function loadOriginalImage(file) {
                 originalFile = file;
+                const generation = imageGeneration;
                 const reader = new FileReader();
+                const fail = () => {
+                    if (generation !== imageGeneration) return;
+                    originalFile = null;
+                    originalDataURL = null;
+                    originalImgElement = null;
+                    originalImage.removeAttribute('src');
+                    previewArea.classList.remove('active');
+                    controls.classList.remove('active');
+                    compressedInfo.textContent = '';
+                    fileInput.value = '';
+                    showToast(t('toastInvalidImage'), 'error');
+                };
+                reader.onerror = fail;
+                reader.onabort = fail;
                 reader.onload = function(e) {
+                    if (generation !== imageGeneration) return;
                     originalDataURL = e.target.result;
                     originalImage.src = originalDataURL;
 
                     const img = new Image();
                     img.onload = function() {
+                        if (generation !== imageGeneration) return;
                         originalImgElement = img;
                         const dims = getImageDimensions(img);
                         let infoHTML = `<span class="size">${formatSize(file.size)}</span>`;
@@ -1063,6 +1202,7 @@
                         previewArea.classList.add('active');
                         controls.classList.add('active');
                     };
+                    img.onerror = fail;
                     img.src = originalDataURL;
                 };
                 reader.readAsDataURL(file);
@@ -1074,14 +1214,14 @@
                     showToast(t('toastInvalidImage'), 'error');
                     return;
                 }
-                if (compressedDataURL && compressedDataURL.startsWith('blob:')) {
-                    URL.revokeObjectURL(compressedDataURL);
-                    compressedDataURL = null;
-                }
-                compressedBlob = null;
-                compressedImage.src = '';
-                compressedInfo.innerHTML = `<span style="color:#94a3b8;">${t('processing')}</span>`;
-                btnDownload.disabled = true;
+                clearCompressedPreview();
+                updateCompressedInfo();
+                originalDataURL = null;
+                originalImage.removeAttribute('src');
+                originalInfo.textContent = '';
+                imageGeneration++;
+                compressionGeneration++;
+                originalImgElement = null;
                 loadOriginalImage(file);
             }
 
@@ -1147,7 +1287,7 @@
                 a.href = url;
                 const originalName = originalFile ? originalFile.name.replace(/\.[^.]+$/, '') : 'imagen';
                 let extension = '.jpg';
-                const fmt = formatSelect.value;
+                const fmt = compressedBlob.type;
                 if (fmt === 'image/png') extension = '.png';
                 else if (fmt === 'image/webp') extension = '.webp';
                 const quality = parseInt(qualitySlider.value);
@@ -1172,16 +1312,13 @@
             });
 
             btnClear.addEventListener('click', function() {
-                if (compressedDataURL && compressedDataURL.startsWith('blob:')) {
-                    URL.revokeObjectURL(compressedDataURL);
-                }
+                imageGeneration++;
+                compressionGeneration++;
+                clearCompressedPreview();
                 originalFile = null;
                 originalDataURL = null;
-                compressedBlob = null;
-                compressedDataURL = null;
                 originalImgElement = null;
-                originalImage.src = '';
-                compressedImage.src = '';
+                originalImage.removeAttribute('src');
                 originalInfo.innerHTML = '';
                 compressedInfo.innerHTML = '';
                 qualitySlider.value = 75;
@@ -1189,6 +1326,7 @@
                 formatSelect.value = 'image/jpeg';
                 currentFormat = 'image/jpeg';
                 btnDownload.disabled = true;
+                btnCopy.disabled = true;
                 previewArea.classList.remove('active');
                 controls.classList.remove('active');
                 fileInput.value = '';
@@ -1203,6 +1341,7 @@
                 loadBackgroundColor();
 
                 btnDownload.disabled = true;
+                btnCopy.disabled = true;
                 compressedInfo.innerHTML = `<span style="color:#94a3b8;">—</span>`;
                 originalInfo.innerHTML = `<span style="color:#94a3b8;">—</span>`;
                 qualityValue.textContent = '75%';
